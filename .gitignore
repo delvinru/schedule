@@ -1,0 +1,7 @@
+.vscode/*
+.mypy_cache/*
+src/bot/lib/__pycache__
+src/bot/util/__pycache__
+src/bot/__pycache__
+src/bot/logs/*
+.env
