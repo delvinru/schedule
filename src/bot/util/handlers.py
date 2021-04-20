@@ -32,7 +32,7 @@ async def process_group(message: types.Message, state: FSMContext):
 
     user_data = await state.get_data()
 
-    await message.answer(f"Группа: {escape_md(user_data['group'])} успешно установлена\! Кста, пошел нахуй\! \:\)")
+    await message.answer(f"Группа: {escape_md(user_data['group'])} успешно установлена\!")
 
     logger.info(f"User successfully registered: {message.from_user.first_name} with group {user_data['group']}")
 

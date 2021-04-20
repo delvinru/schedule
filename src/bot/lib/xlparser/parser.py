@@ -518,7 +518,7 @@ def convert_in_postgres(group_schedule, con):
 if __name__ == "__main__":
     _ident = 0
 
-    # update_MireaSchedule()
+    update_MireaSchedule()
     today = date.today()
     print(today)
     
