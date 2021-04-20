@@ -24,7 +24,7 @@ async def start(message: types.Message):
 @dp.message_handler(state=User.group)
 async def process_group(message: types.Message, state: FSMContext):
 
-    if not re.findall(r"\w{4}-\d{2}-\d{2}", message.text):
+    if re.search(r"\b\w{4}-\d{2}-\d{2}\b", message.text) == None:
         await message.answer("Пожалуйста, укажите группу в правильном формате\!")
         return
 
@@ -32,7 +32,7 @@ async def process_group(message: types.Message, state: FSMContext):
 
     user_data = await state.get_data()
 
-    await message.answer(f"Группа: {escape_md(user_data['group'])} успешно установлена\!")
+    await message.answer(f"Группа: {escape_md(user_data['group'])} успешно установлена\! Кста, пошел нахуй\! \:\)")
 
     logger.info(f"User successfully registered: {message.from_user.first_name} with group {user_data['group']}")
 
