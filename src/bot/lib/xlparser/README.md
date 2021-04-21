@@ -62,3 +62,10 @@ def convert_in_postgres(group_schedule, con)
 # con           - дискриптор соединения с базой данных
 ```
 Записывает данные в JSON или POSTGRES.
+
+### TODO:
+- [✓] Add README for Parser
+- [ ] Connection to base using Class
+- [ ] Use to connection environment variable
+- [ ] One permanent or Much short-time connection to base?
+- [ ] Think about rational storage use (needed .json and .xlsx in permanent storage? 🤔)
