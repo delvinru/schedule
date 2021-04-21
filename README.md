@@ -21,7 +21,7 @@ docker-compose up --build
 
 
 ### TODO:
-- [ ] Add parser for schedule
+- [✓] Add parser for schedule
 - [ ] Save user state in database
 - [ ] Make an interactive menu
 - [ ] Think about the output in messages
