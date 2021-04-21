@@ -24,7 +24,7 @@ async def start(message: types.Message):
 @dp.message_handler(state=User.group)
 async def process_group(message: types.Message, state: FSMContext):
 
-    if not re.findall(r"\w{4}-\d{2}-\d{2}", message.text):
+    if re.search(r"\b\w{4}-\d{2}-\d{2}\b", message.text) == None:
         await message.answer("Пожалуйста, укажите группу в правильном формате\!")
         return
 
