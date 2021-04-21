@@ -1,2 +1,5 @@
 aiogram==2.12.1
 loguru==0.5.3
+xlrd==1.2
+requests==2.25.1
+psycopg2==2.8.6
