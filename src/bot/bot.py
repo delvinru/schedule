@@ -1,22 +1,23 @@
 import asyncio
 import sys
 
+from aiogram import Bot
+from aiogram.types import BotCommand
 from loguru import logger
 
 from util.handlers import *
-from aiogram import Bot
-from aiogram.types import BotCommand
-from util.settings import dp, bot
+from util.settings import bot, dp
 
 
 async def set_commands(bot: Bot):
     """ Register command for Telegram interface """
 
     commands = [
-        BotCommand(command='/start', description='Начать взаимодействие с ботом'),
-        BotCommand(command='/today', description='Узнать расписание на сегодня'),
-        BotCommand(command='/next', description='Узнать расписание на завтра'),
-        BotCommand(command='/week', description='Узнать расписание на неделю')
+        BotCommand(command='/start',  description='Начать взаимодействие с ботом'),
+        BotCommand(command='/today',  description='Узнать расписание на сегодня'),
+        BotCommand(command='/next',   description='Узнать расписание на завтра'),
+        BotCommand(command='/week',   description='Узнать расписание на неделю'),
+        BotCommand(command='/update', description='Указать новую группу')
     ]
     await bot.set_my_commands(commands)
 

@@ -91,11 +91,17 @@ class Database(object):
         query = "SELECT group_name FROM profiles WHERE tgid = %s"
         self.cursor.execute(query, (tgid, ))
         data = self.cursor.fetchone()
-        print(data)
         if not data:
             return ''
         else:
             return data[0]
+    
+    def update_user_info(self, tgid: int, group: str):
+        """ Update user group in table """
+
+        query = "UPDATE profiles SET group_name=%s WHERE tgid=%s"
+        self.cursor.execute(query, (group, tgid, ))
+        self.con.commit()
     
     def insert_lesson(self, idn, group, day_now, lesson, typ, audit, order, even, strweek):
         query = """

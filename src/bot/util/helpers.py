@@ -1,12 +1,13 @@
 from datetime import date
+
 import xlparser.parser as parser
-from aiogram.utils.markdown import escape_md, text, bold, italic
-from loguru import logger
+
 
 def parse_day(data: list, one_day: bool) -> str:
     lessons = []
     header = f'{data[0][2].capitalize()} | '
     flag = True
+
     for lesson in data:
         # Skip emty lessons
         if lesson[3] == '':
