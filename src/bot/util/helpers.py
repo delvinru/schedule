@@ -3,7 +3,7 @@ import xlparser.parser as parser
 from aiogram.utils.markdown import escape_md, text, bold, italic
 from loguru import logger
 
-def parse_day(data: list) -> str:
+def parse_day(data: list, one_day: bool) -> str:
     lessons = []
     header = f'{data[0][2].capitalize()} | '
     flag = True
@@ -16,9 +16,15 @@ def parse_day(data: list) -> str:
             flag = False
 
     if flag:
-        header += 'Дистанционное обучение\n\n'
+        if one_day:
+            header += 'Дистанционное обучение\n\n'
+        else:
+            header += 'Дистанционное обучение\n'
     else:
-        header += 'Очные занятия\n\n'
+        if one_day:
+            header += 'Очные занятия\n\n'
+        else:
+            header += 'Очные занятия\n'
 
     res = header + '\n'.join(lessons)
     return res
@@ -36,11 +42,11 @@ def craft_schedule(group: str, mode: int) -> str:
 
     if mode == 0 or mode == 1:
         # Parsing today and next similar
-        res = parse_day(data)
+        res = parse_day(data, one_day=True)
     elif mode == 2:
         n = len(data)
         # 6 - count of days
         for i in range(n//6):
-            res += parse_day(data[i*6:6*(i+1)]) + '\n\n'
+            res += parse_day(data[i*6:6*(i+1)], one_day=False) + '\n\n'
 
     return res
