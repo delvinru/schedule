@@ -76,5 +76,6 @@ async def get_week(message: types.Message):
 async def admin_feature(message: types.Message):
     """ Admin feature for update database """
 
+    await message.answer(escape_md('Начал обновлять базу. Это может занять некоторое время...'))
     parser.update_MireaSchedule()
-    await message.answer('База данных успешно обновлена!')
+    await message.answer('База данных успешно обновлена\!')

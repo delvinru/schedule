@@ -100,6 +100,7 @@ class Database(object):
         VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         self.cursor.execute(query, (idn, group, day_now, lesson, typ, audit, order, even, strweek, ))
+        self.con.commit()
     
     def select_group_and_week_day(self, group, week_day, even_week):
         query = """

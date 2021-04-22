@@ -6,13 +6,13 @@ from loguru import logger
 
 def parse_day(data: list) -> str:
     lessons = []
-    header = f'{data[0][2]} | '
+    header = f'{data[0][2].capitalize()} | '
     flag = True
     for lesson in data:
         # Skip emty lessons
         if lesson[3] == '':
             continue
-        lessons.append(str(lesson[6])+ '. '  + lesson[4].upper() + ' | ' + lesson[3] + ' | ' + lesson[5])
+        lessons.append(f'{lesson[6]}. {lesson[4].upper()} | {lesson[3]} | {lesson[5]}')
         if lesson[5] != 'Д':
             flag = False
 
@@ -25,8 +25,7 @@ def parse_day(data: list) -> str:
     return res
 
 def craft_schedule(group: str, mode: int) -> str:
-    # today = date.today()
-    today = datetime.date(2021, 4, 21)
+    today = date.today()
     data = []
     res = ''
     if mode == 0:

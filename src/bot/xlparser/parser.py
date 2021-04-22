@@ -1,13 +1,14 @@
 import json
-import xlrd
-import re
-import requests
 import os
+import re
 from datetime import *
 
+import requests
+import xlrd
+from loguru import logger
 from util.settings import db as tm
-import xlparser.settings.config as cfg
 
+import xlparser.settings.config as cfg
 
 _ident = 0
 
@@ -23,7 +24,7 @@ def update_MireaSchedule():
     get_xlfiles(cfg.links_file)
 
     # full_groups_shedule = {}
-
+    
     for filename in os.listdir("./xlparser/xl"):
         # * Полный список групп с расписанием * #
         groups_shedule = parse_xlfiles(filename, cfg.block_tags, cfg.special_tags, cfg.substitute_lessons)
@@ -31,7 +32,7 @@ def update_MireaSchedule():
             continue
 
         # * Записываем расписание в джсон * #
-        convert_in_json(groups_shedule, filename[:-5] + ".json")
+        # convert_in_json(groups_shedule, filename[:-5] + ".json")
         convert_in_postgres(groups_shedule)
 
         print("filename=" + filename, "Complete!", sep=" ")
@@ -43,7 +44,7 @@ def update_MireaSchedule():
     # with open("./json/AllInOne.json", "w", encoding="utf-8") as f:                        # Создание одной большой базы
     #     json.dump(full_groups_shedule, f, sort_keys=True, indent=4, ensure_ascii=False)
     
-    print("Database closed and commited successfully")
+    logger.info("Database updated succefully!")
 
 def get_TodaySchedule(today, group):
     '''
@@ -480,9 +481,6 @@ def convert_in_postgres(group_schedule):
                 idn = str(_ident)
                 tm.insert_lesson(idn, group, day_now, lesson, typ, audit, order, even, strweek)
                 _ident += 1
-                # connect.commit()  # Чтоб не ломать базу, лучше сначала все добавить в execute, а потом сделать commit
-    
-    
 
 
 if __name__ == "__main__":
