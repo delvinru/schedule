@@ -56,7 +56,7 @@ def get_TodaySchedule(today, group):
     week_number = delta_day // 7 + 1
     even_week = _get_even_week(week_number)
     week_day = _get_week_day(today.weekday())
-    if week_day == "SUNDAY":
+    if week_day == "ВОСКРЕСЕНЬЕ":
         return None
 
     cur = tm.select_group_and_week_day(group, week_day, even_week)
@@ -108,19 +108,19 @@ def _check_tags(tags, line):
 
 def _get_week_day(day_number):
     if day_number == 0:
-        return "MONDAY"
+        return "ПОНЕДЕЛЬНИК"
     elif day_number == 1:
-        return "TUESDAY"
+        return "ВТОРНИК"
     elif day_number == 2:
-        return "WEDNESDAY"
+        return "СРЕДА"
     elif day_number == 3:
-        return "THURSDAY"
+        return "ЧЕТВЕРГ"
     elif day_number == 4:
-        return "FRIDAY"
+        return "ПЯТНИЦА"
     elif day_number == 5:
-        return "SATURDAY"
+        return "СУББОТА"
     elif day_number == 6:
-        return "SUNDAY"
+        return "ВОСКРЕСЕНЬЕ"
 
 def _get_even_week(week_number):
     if week_number % 2 == 0:
@@ -463,7 +463,7 @@ def convert_in_postgres(group_schedule):
     Записывает в базу PostgreSQL расписание группы. Сначала 
     '''
     global _ident
-    days = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"]
+    days = ["ПОНЕДЕЛЬНИК", "ВТОРНИК", "СРЕДА", "ЧЕТВЕРГ", "ПЯТНИЦА", "СУББОТА"]
     days_iter = iter(days)
 
     for group in group_schedule.keys():
