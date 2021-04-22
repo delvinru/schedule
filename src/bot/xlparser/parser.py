@@ -124,9 +124,9 @@ def _check_tags(tags, line):
     Поиск в строке одного из списка тегов. В случае нахождения тега, возвращает строку с этим тегом,
     и None в противном случае. Возвращает первый найденый тег.
     '''
-    for i in tags:
+    for i in tags.keys():
         if re.search(i, line) != None:
-            return i
+            return tags[i]
     return None
 
 def _get_week_day(day_number):
