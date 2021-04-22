@@ -1,6 +1,7 @@
 from datetime import date
 
 import xlparser.parser as parser
+from aiogram.utils.markdown import text, bold
 
 
 def parse_day(data: list, one_day: bool) -> str:
@@ -51,3 +52,9 @@ def craft_schedule(group: str, mode: int) -> str:
             res += parse_day(data[i*6:6*(i+1)], one_day=False) + '\n\n'
 
     return res
+
+def craft_week_message() -> str:
+    today = date.today()
+    week = parser.get_WeekNumber(today)
+    data = text("Текущая неделя: ", bold(str(week)))
+    return data

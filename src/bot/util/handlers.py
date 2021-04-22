@@ -134,8 +134,14 @@ async def update_user_group(message: types.Message, state: FSMContext):
     await message.answer('Хорошо, укажите вашу группу')
     await state.set_state(User.group)
 
+@dp.message_handler(commands='getweek')
+async def get_current_week(message: types.Message):
+    text = craft_week_message()
+    await message.answer(text)
+
+
 @dp.message_handler(commands='update_db')
-async def admin_feature(message: types.Message):
+async def admin_update_db(message: types.Message):
     """ Admin feature for update database """
     if message.from_user.id not in ADMINS:
         return await message.answer(escape_md("Извини, но у тебя нет прав на это!🤷‍♂️"))

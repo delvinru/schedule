@@ -1,0 +1,22 @@
+CREATE TABLE IF NOT EXISTS SCHEDULE  
+(
+    ID INT PRIMARY KEY NOT NULL,
+    GRP TEXT,
+    DAY TEXT,
+    LESSON TEXT,
+    TYPE TEXT,
+    AUDIT TEXT,
+    ORD INT,
+    EVEN TEXT,
+    WEEK INT[]
+);
+
+CREATE TABLE IF NOT EXISTS profiles
+(
+    ID SERIAL PRIMARY KEY,
+    tgid BIGINT UNIQUE NOT NULL,
+    username VARCHAR(64) NOT NULL,
+    first_name VARCHAR(64) NOT NULL,
+    language_code VARCHAR(8) NOT NULL,
+    group_name VARCHAR(64) NOT NULL
+);

@@ -19,4 +19,3 @@ storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
 db = Database(database=pg_db, user=pg_user, password=pg_pwd, host=pg_host, port=pg_port)
-db.init_table()
