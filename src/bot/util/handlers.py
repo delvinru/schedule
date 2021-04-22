@@ -3,7 +3,7 @@ import re
 import xlparser.parser as parser
 from aiogram import types
 from aiogram.dispatcher import FSMContext
-from aiogram.utils.markdown import escape_md
+from aiogram.utils.markdown import escape_md, text, bold
 from loguru import logger
 
 from util.helpers import *
@@ -151,6 +151,18 @@ async def get_user_profile(message: types.Message):
     
     text = craft_user_profile(message, group)
     await message.answer(text)
+
+@dp.message_handler(commands='dev')
+async def show_developers(message: types.Message):
+    data = text(
+        "Разработчик интерфейса: ",
+        bold("@delvinru"),
+        "\nРазработчик парсера: ",
+        bold("@ozzero"),
+        "\nПо любым вопросам, предложениям по улучшению бота, можно писать в личку\.",
+        sep = ""
+    )
+    await message.answer(data)
 
 @dp.message_handler(commands='update_db')
 async def admin_update_db(message: types.Message):
