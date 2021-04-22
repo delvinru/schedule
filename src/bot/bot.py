@@ -7,7 +7,6 @@ from util.handlers import *
 from aiogram import Bot
 from aiogram.types import BotCommand
 from util.settings import dp, bot
-import xlparser.parser as parser
 
 
 async def set_commands(bot: Bot):
