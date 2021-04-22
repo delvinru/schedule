@@ -98,6 +98,27 @@ def get_WeekSchedule(today, group):
 
     return result
 
+def get_WeekNumber(today):
+    '''
+    Возвращает номер недели.
+    '''
+    ZeroDay = date(cfg.semestr_start[0], cfg.semestr_start[1], cfg.semestr_start[2])
+    delta_day = abs((today - ZeroDay).days)
+    return delta_day // 7 + 1
+
+def check_GroupExist(group):
+    '''
+    Проверяет существование группы в базе
+    '''
+
+    cur = tm.select_group(group)
+
+    if len(cur) == 0:
+        return False
+    else:
+        return True
+
+
 def _check_tags(tags, line):
     '''
     Поиск в строке одного из списка тегов. В случае нахождения тега, возвращает строку с этим тегом,

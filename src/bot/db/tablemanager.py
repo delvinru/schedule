@@ -112,6 +112,15 @@ class Database(object):
         """
         self.cursor.execute(query, (group, week_day, even_week, ))
         return self.cursor.fetchall()
+
+    def select_group(self, group):
+        query = """
+            SELECT * FROM SCHEDULE
+            WHERE grp=%s
+            ORDER BY id;
+        """
+        self.cursor.execute(query, (group, ))
+        return self.cursor.fetchall()
     
     def select_group_and_even_week(self, group, even_week):
         query = """

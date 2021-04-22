@@ -47,7 +47,8 @@ async def cancel_handler(message: types.Message, state: FSMContext):
 @dp.message_handler(state=User.group)
 async def process_group(message: types.Message, state: FSMContext):
 
-    if re.search(r"\b\w{4}-\d{2}-\d{2}\b", message.text) == None:
+    find_group = re.search(r"\b\w{4}-\d{2}-\d{2}\b", message.text)
+    if  find_group == None or parser.check_GroupExist(find_group.group(0)) == False:
         await message.answer("Пожалуйста, укажите группу в правильном формате\!")
         return
 
