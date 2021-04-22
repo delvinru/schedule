@@ -1,16 +1,23 @@
+import asyncio
 import sys
 
-from aiogram import executor
 from loguru import logger
 
-from util.settings import dp, bot
 from util.handlers import *
+from util.settings import dp
+import xlparser.parser as parser
 
 
-def main():
+
+async def main():
     """ Start long polling """
 
-    executor.start_polling(dp, skip_updates=True)
+    # Init table on startup
+    # TODO: made this as admin feauture
+    # parser.update_MireaSchedule()
+
+    # Start long pollings for bot
+    await dp.start_polling()
 
 if __name__ == "__main__":
     # Set base logging
@@ -22,4 +29,4 @@ if __name__ == "__main__":
         rotation="1 MB")
     logger.add(sys.__stdout__)
 
-    main()
+    asyncio.run(main())

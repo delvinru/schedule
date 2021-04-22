@@ -3,11 +3,10 @@ import xlrd
 import re
 import requests
 import os
-import psycopg2
 from datetime import *
 
-import settings.tablemanager as tm
-import settings.config as cfg
+from util.settings import db as tm
+import xlparser.settings.config as cfg
 
 
 _ident = 0
@@ -25,9 +24,7 @@ def update_MireaSchedule():
 
     # full_groups_shedule = {}
 
-    con = tm.connect()
-
-    for filename in os.listdir("./xl"):
+    for filename in os.listdir("./xlparser/xl"):
         # * Полный список групп с расписанием * #
         groups_shedule = parse_xlfiles(filename, cfg.block_tags, cfg.special_tags, cfg.substitute_lessons)
         if groups_shedule == None:
@@ -35,7 +32,7 @@ def update_MireaSchedule():
 
         # * Записываем расписание в джсон * #
         convert_in_json(groups_shedule, filename[:-5] + ".json")
-        convert_in_postgres(groups_shedule, con)
+        convert_in_postgres(groups_shedule)
 
         print("filename=" + filename, "Complete!", sep=" ")
 
@@ -46,15 +43,12 @@ def update_MireaSchedule():
     # with open("./json/AllInOne.json", "w", encoding="utf-8") as f:                        # Создание одной большой базы
     #     json.dump(full_groups_shedule, f, sort_keys=True, indent=4, ensure_ascii=False)
     
-    tm.end(con)
     print("Database closed and commited successfully")
 
 def get_TodaySchedule(today, group):
     '''
     Возвращает расписание [список] группы на сегодня. Возвращает None, если вызов произошел в воскресенье.
     '''
-    con = tm.connect()
-    cur = tm.cursor(con)
 
     ZeroDay = date(cfg.semestr_start[0], cfg.semestr_start[1], cfg.semestr_start[2])
     delta_day = abs((today - ZeroDay).days)
@@ -64,23 +58,14 @@ def get_TodaySchedule(today, group):
     week_day = _get_week_day(today.weekday())
     if week_day == "SUNDAY":
         return None
-    
-    cur.execute(
-        f'''
-        SELECT * FROM SCHEDULE
-        WHERE grp='{group}' and day='{week_day}' and even='{even_week}'
-        ORDER BY id;
-        '''
-    )
 
-
+    cur = tm.select_group_and_week_day(group, week_day, even_week)
     result = []
     for answer in cur:
         weeks_av = answer[8]
         if week_number in weeks_av:
             result.append(answer)
 
-    tm.end(con)
     return result
 
 def get_TomorrowSchedule(today, group):
@@ -94,8 +79,6 @@ def get_WeekSchedule(today, group):
     '''
     Возвращает расписание [список] группы на неделю.
     '''
-    con = tm.connect()
-    cur = tm.cursor(con)
 
     ZeroDay = date(cfg.semestr_start[0], cfg.semestr_start[1], cfg.semestr_start[2])
     delta_day = abs((today - ZeroDay).days)
@@ -103,13 +86,7 @@ def get_WeekSchedule(today, group):
     week_number = delta_day // 7 + 1
     even_week = _get_even_week(week_number)
 
-    cur.execute(
-        f'''
-        SELECT * FROM SCHEDULE
-        WHERE grp='{group}' and even='{even_week}'
-        ORDER BY id;
-        '''
-    )
+    cur = tm.select_group_and_even_week(group, even_week)
 
     result = []
     for answer in cur:
@@ -117,7 +94,6 @@ def get_WeekSchedule(today, group):
         if week_number in weeks_av:
             result.append(answer)
 
-    tm.end(con)
     return result
 
 def _check_tags(tags, line):
@@ -152,7 +128,7 @@ def _get_even_week(week_number):
     else:
         return "ODD"
 
-def get_links(link, filename="links.txt"):
+def get_links(link, filename="./xlparser/links.txt"):
     '''
     Достает с html-страницы все ссылки формата " http:\/\/ ... .xlsx "
     и записывает в файл links.txt.
@@ -167,7 +143,7 @@ def get_links(link, filename="links.txt"):
             for link in find:
                 f.write(link[0] + "\n")
 
-def get_xlfiles(filename="links.txt"):
+def get_xlfiles(filename="./xlparser/links.txt"):
     '''
     Достает все ссылки из файла links.txt, создаем xl-таблицы, складываем их в папку.
     '''
@@ -482,12 +458,11 @@ def convert_in_json(data, filename):
     with open("./json/" + filename, "w", encoding="utf-8") as f:
         json.dump(data, f, sort_keys=True, indent=4, ensure_ascii=False)  
 
-def convert_in_postgres(group_schedule, con):
+def convert_in_postgres(group_schedule):
     '''
     Записывает в базу PostgreSQL расписание группы. Сначала 
     '''
     global _ident
-    cursor = con.cursor()
     days = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"]
     days_iter = iter(days)
 
@@ -503,12 +478,7 @@ def convert_in_postgres(group_schedule, con):
                 
                 
                 idn = str(_ident)
-                cursor.execute(
-                    f'''
-                    INSERT INTO SCHEDULE (ID,GRP,DAY,LESSON,TYPE,AUDIT,ORD,EVEN,WEEK)
-                    VALUES({idn},'{group}','{day_now}','{lesson}','{typ}','{audit}','{order}','{even}','{strweek}')
-                    '''
-                )
+                tm.insert_lesson(idn, group, day_now, lesson, typ, audit, order, even, strweek)
                 _ident += 1
                 # connect.commit()  # Чтоб не ломать базу, лучше сначала все добавить в execute, а потом сделать commit
     

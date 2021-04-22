@@ -1,5 +1,15 @@
 version: "3.9"
 services: 
+    database:
+        image: postgres:latest
+        volumes: 
+            - ./src/data:/var/lib/postgresql/data
+        ports:
+            - "5432:5432"
+        environment: 
+            - POSTGRES_USER=${POSTGRES_USER}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+            - POSTGRES_DB=${POSTGRES_DB}
     bot:
         build: 
             context: ./src/bot
@@ -8,15 +18,11 @@ services:
             - ./src/bot/logs:/bot/logs
         environment: 
             - API_TOKEN=${API_TOKEN}
-        restart: on-failure
-
-    database:
-        image: postgres
-        volumes: 
-            - ./src/db:/var/lib/postgresql
-        ports: 
-            - "5432:5432"
-        environment: 
             - POSTGRES_USER=${POSTGRES_USER}
             - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
             - POSTGRES_DB=${POSTGRES_DB}
+        restart: on-failure
+        depends_on:
+            - database
+        links:
+            - "database"

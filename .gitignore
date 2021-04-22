@@ -4,4 +4,5 @@ src/bot/lib/__pycache__
 src/bot/util/__pycache__
 src/bot/__pycache__
 src/bot/logs/*
+src/data/*
 .env
