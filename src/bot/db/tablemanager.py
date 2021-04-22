@@ -71,12 +71,12 @@ class Database(object):
         self.cursor.execute(query, (group, tgid, ))
         self.con.commit()
     
-    def insert_lesson(self, idn, group, day_now, lesson, typ, audit, order, even, strweek):
+    def insert_lesson(self, idn, group, day_now, lesson, typ, audit, start_time, end_time, order, even, strweek):
         query = """
-        INSERT INTO SCHEDULE (ID,GRP,DAY,LESSON,TYPE,AUDIT,ORD,EVEN,WEEK)
-        VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)
+        INSERT INTO SCHEDULE (ID,GRP,DAY,LESSON,TYPE,AUDIT,START_TIME,END_TIME,ORD,EVEN,WEEK)
+        VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
-        self.cursor.execute(query, (idn, group, day_now, lesson, typ, audit, order, even, strweek, ))
+        self.cursor.execute(query, (idn, group, day_now, lesson, typ, audit, start_time, end_time, order, even, strweek, ))
     
     def select_group_and_week_day(self, group, week_day, even_week):
         query = """

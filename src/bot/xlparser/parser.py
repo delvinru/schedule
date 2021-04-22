@@ -27,18 +27,18 @@ def update_MireaSchedule():
 
     for filename in os.listdir("./xlparser/xl"):
         # * Полный список групп с расписанием * #
-        groups_shedule = parse_xlfiles(filename, cfg.block_tags, cfg.special_tags, cfg.substitute_lessons)
-        if groups_shedule == None:
+        groups_schedule = parse_xlfiles(filename, cfg.block_tags, cfg.special_tags, cfg.substitute_lessons)
+        if groups_schedule == None:
             continue
 
         # * Записываем расписание в джсон * #
         # convert_in_json(groups_shedule, filename[:-5] + ".json")
-        convert_in_postgres(groups_shedule)
+        convert_in_postgres(groups_schedule)
 
         print("filename=" + filename, "Complete!", sep=" ")
 
         # full_groups_shedule = {**groups_shedule, **full_groups_shedule}                   # Можно сохранять полную базу, которую можно слить в один ОГРОМНЫЙ файл
-        groups_shedule.clear() 
+        groups_schedule.clear() 
 
 
     # with open("./json/AllInOne.json", "w", encoding="utf-8") as f:                        # Создание одной большой базы
@@ -64,7 +64,7 @@ def get_TodaySchedule(today, group):
     cur = tm.select_group_and_week_day(group, week_day, even_week)
     result = []
     for answer in cur:
-        weeks_av = answer[8]
+        weeks_av = answer[10]
         if week_number in weeks_av:
             result.append(answer)
 
@@ -92,7 +92,7 @@ def get_WeekSchedule(today, group):
 
     result = []
     for answer in cur:
-        weeks_av = answer[8]
+        weeks_av = answer[10]
         if week_number in weeks_av:
             result.append(answer)
 
@@ -217,7 +217,7 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
         return line
 
     def _weekslicer(day_lessons): # Обработчик влючения/исключения недель
-        lesson, typ, audit, order, even, week = day_lessons
+        lesson, typ, audit, start_time, end_time, order, even, week = day_lessons
         if lesson == "":
             return day_lessons
         arr = []
@@ -230,7 +230,7 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
             except:
                 pass
             finally:
-                return (lesson, typ, audit, order, even, week)
+                return (lesson, typ, audit, start_time, end_time, order, even, week)
 
         find = re.match(r"([\d\, \-\/н]+)н\.?", lesson) # 12,15 н.
         if find != None:
@@ -251,7 +251,7 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
             finally:
                 week = arr
                 week.sort()
-                return (lesson, typ, audit, order, even, week)
+                return (lesson, typ, audit, start_time, end_time, order, even, week)
         
         find = re.search(r"\(([\d\, \-\/н]+)н\.?\)", lesson) # (12,15 н.)
         if find != None:
@@ -272,7 +272,7 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
             finally:
                 week = arr
                 week.sort()
-                return (lesson, typ, audit, order, even, week)
+                return (lesson, typ, audit, start_time, end_time, order, even, week)
 
         find = re.search(r"\(кр. ([\d\, ]+)н\.\)", lesson) # (кр. 12,15 н.) 
         if find != None:
@@ -283,7 +283,7 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
             except:
                 pass
             finally:
-                return (lesson, typ, audit, order, even, week)
+                return (lesson, typ, audit, start_time, end_time, order, even, week)
         return day_lessons # Ничего не нашли
 
     def _recurparser(line):
@@ -328,11 +328,11 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
                 except:
                     audit = audit_arr[len(audit_arr) - 1]
 
-                new_objs.append((lesson, typ, audit, obj[3], obj[4], obj[5]))
+                new_objs.append((lesson, typ, audit, obj[3], obj[4], obj[5], obj[6], obj[7]))
         return new_objs
 
     def _default_handler(): # Стандартный обработчик 
-        nonlocal sheet, groups_shedule, find, col
+        nonlocal sheet, groups_schedule, find, col, time_schedule
         for k in range(6): 
             day_lesson = sheet.col_values(col - 1, start_rowx=3 + 12 * k, end_rowx=15 + 12 * k) # Делаем срез предметов
             type_lesson = sheet.col_values(col, start_rowx=3 + 12 * k, end_rowx=15 + 12 * k) # Делаем срез типа заняний (пр, лекция, лаб)
@@ -348,15 +348,17 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
             order = 1
             week = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
             schedule = []
+            time_iter = iter(time_schedule)
             for i in range(len(day_lesson)):
                 lesson = day_lesson[i]
                 typ = type_lesson[i]
                 audit = audit_lesson[i] 
+                time = next(time_iter)
                 if evenodd % 2 == 0:
                     eo = "EVEN"
                 else:
                     eo = "ODD"
-                obj = [lesson, typ, audit, int(order), eo, week.copy()] # Объединяем все в один кортеж
+                obj = [lesson, typ, audit, time[0], time[1], int(order), eo, week.copy()] # Объединяем все в один кортеж
                 
                 obj_arr = _twiceschedule(obj)
                 for i in range(len(obj_arr)):
@@ -366,10 +368,10 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
                 evenodd += 1
                 order += 0.5
             
-            groups_shedule[find.group(1)][k] = schedule
+            groups_schedule[find.group(1)][k] = schedule
 
     def _mag_handler(): # Обработчик магистров
-        nonlocal sheet, groups_shedule, find, col
+        nonlocal sheet, groups_schedule, find, col, time_schedule
         for k in range(5): 
             day_lesson = sheet.col_values(col - 1, start_rowx=3 + 18 * k, end_rowx=21 + 18 * k) # Делаем срез предметов
             type_lesson = sheet.col_values(col, start_rowx=3 + 18 * k, end_rowx=21 + 18 * k) # Делаем срез типа заняний (пр, лекция, лаб)
@@ -385,15 +387,17 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
             order = 1
             week = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
             schedule = []
+            time_iter = iter(time_schedule)
             for i in range(len(day_lesson)):
                 lesson = day_lesson[i]
                 typ = type_lesson[i]
                 audit = audit_lesson[i] 
+                time = next(time_iter)
                 if evenodd % 2 == 0:
                     eo = "EVEN"
                 else:
                     eo = "ODD"
-                obj = [lesson, typ, audit, int(order), eo, week.copy()] # Объединяем все в один кортеж
+                obj = [lesson, typ, audit, time[0], time[1], int(order), eo, week.copy()] # Объединяем все в один кортеж
                 
                 obj_arr = _twiceschedule(obj)
                 for i in range(len(obj_arr)):
@@ -403,7 +407,7 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
                 evenodd += 1
                 order += 0.5
             
-            groups_shedule[find.group(1)][k] = schedule
+            groups_schedule[find.group(1)][k] = schedule
         
         # Делаем срез для субботы
         day_lesson = sheet.col_values(col - 1, start_rowx=93, end_rowx=105)
@@ -416,15 +420,18 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
             audit_lesson[i] = _antidot(audit_lesson[i])
         
         evenodd = 1
+        schedule = []
+        time_iter = iter(time_schedule)
         for i in range(len(day_lesson)):
             lesson = day_lesson[i]
             typ = type_lesson[i]
             audit = audit_lesson[i] 
+            time = next(time_iter)
             if evenodd % 2 == 0:
                 eo = "EVEN"
             else:
                 eo = "ODD"
-            obj = [lesson, typ, audit, int(order), eo, week.copy()] # Объединяем все в один кортеж
+            obj = [lesson, typ, audit, time[0], time[1], int(order), eo, week.copy()] # Объединяем все в один кортеж
             
             obj_arr = _twiceschedule(obj)
             for i in range(len(obj_arr)):
@@ -433,7 +440,7 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
             schedule.extend(obj_arr) 
             evenodd += 1
             order += 0.5
-        groups_shedule[find.group(1)][5] = schedule
+        groups_schedule[find.group(1)][5] = schedule
 
     
 
@@ -442,14 +449,35 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
     if _check_tags(cfg.block_tags, xlfilename) != None:
         return None
 
-    groups_shedule = {}    
-    
+    groups_schedule = {} # Расписание каждой группы    
+    time_schedule = [] # Раписание для текущего файла
     # * Открываем эксель таблицу * # 
     rb = xlrd.open_workbook("./xl/" + xlfilename)
     sheet = rb.sheet_by_index(0)
     
     col = 0
     now_tag = _check_tags(special_tags, xlfilename)
+
+    if now_tag == "Маг" or now_tag == "маг":
+        start_slice = sheet.col_values(2, start_rowx=3, end_rowx=21)
+        end_slice = sheet.col_values(3, start_rowx=3, end_rowx=21)
+    else:
+        start_slice = sheet.col_values(2, start_rowx=3, end_rowx=15)
+        end_slice = sheet.col_values(3, start_rowx=3, end_rowx=15)
+
+    for time in start_slice:
+        if time != '':
+            time_schedule.append(time)
+        else:
+            time_schedule.append(time_schedule[len(time_schedule) - 1])
+    i = 0
+    for time in end_slice:
+        if time != '':
+            time_schedule[i] = (time_schedule[i], time)
+        else:
+            time_schedule[i] = time_schedule[i - 1]
+        i += 1
+
     
     # * Крутим все группы, заполняем расписание * #
     for now_val in sheet.row_values(1):
@@ -461,14 +489,14 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
             col += 1
         else:
             col += 1
-            groups_shedule[find.group(1)] = [[], [], [], [], [], []] # ! Записывает только имя группы. Все спецобозначения откидываются
+            groups_schedule[find.group(1)] = [[], [], [], [], [], []] # ! Записывает только имя группы. Все спецобозначения откидываются
 
             if now_tag == "Маг" or now_tag == "маг":
                 _mag_handler()
             else:
                 _default_handler()
 
-    return groups_shedule
+    return groups_schedule
 
 def convert_in_json(data, filename):
     '''
@@ -494,14 +522,14 @@ def convert_in_postgres(group_schedule):
         for day in group_schedule[group]:
             day_now = next(days_iter)
             for lesson_info in day:
-                lesson, typ, audit, order, even, week = lesson_info
+                lesson, typ, audit, start_time, end_time, order, even, week = lesson_info
                 
                 strweek = [str(i) for i in week]
                 strweek = "{" + ",".join(strweek) + "}"
                 
                 
                 idn = str(_ident)
-                tm.insert_lesson(idn, group, day_now, lesson, typ, audit, order, even, strweek)
+                tm.insert_lesson(idn, group, day_now, lesson, typ, audit, start_time, end_time, order, even, strweek)
                 _ident += 1
 
 
