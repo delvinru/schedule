@@ -59,9 +59,15 @@ async def process_group(message: types.Message, state: FSMContext):
         user_data = await state.get_data()
 
         await message.answer(f"Группа: {escape_md(user_data['group'])} успешно установлена\!")
+
+        user = 'Null'
+
+        if message.from_user.username != None:
+            user = message.from_user.username
+
         db.insert_user(
             tgid=message.from_user.id,
-            username=message.from_user.username,
+            username=user,
             first_name=message.from_user.first_name,
             lang=message.from_user.language_code,
             group=user_data['group']
