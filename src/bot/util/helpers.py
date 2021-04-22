@@ -14,7 +14,7 @@ def parse_day(data: list, one_day: bool) -> str:
         # Skip emty lessons
         if lesson[3] == '':
             continue
-        lessons.append(f'{lesson[6]}. {lesson[4].upper()} | {lesson[3]} | {lesson[5]}')
+        lessons.append(f'{lesson[8]}. {lesson[4].upper()} | {lesson[3]} | {lesson[5]}')
         if lesson[5] != 'Д':
             flag = False
 
