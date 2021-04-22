@@ -3,7 +3,7 @@ import re
 import xlparser.parser as parser
 from aiogram import types
 from aiogram.dispatcher import FSMContext
-from aiogram.utils.markdown import escape_md
+from aiogram.utils.markdown import escape_md, text, bold
 from loguru import logger
 
 from util.helpers import *
@@ -89,7 +89,6 @@ async def get_today(message: types.Message):
         await state.update_data(group=group)
 
     user_data = await state.get_data()
-    logger.info(f'Today state: {user_data}')
     group = user_data['group']
     text = craft_schedule(group, mode=0)
     await message.answer(escape_md(text))
@@ -124,7 +123,6 @@ async def get_week(message: types.Message):
         await state.update_data(group=group)
 
     user_data = await state.get_data()
-    logger.info(f'Week state: {user_data}')
     group = user_data['group']
     text = craft_schedule(group, mode=2)
     await message.answer(escape_md(text))
@@ -139,6 +137,32 @@ async def get_current_week(message: types.Message):
     text = craft_week_message()
     await message.answer(text)
 
+@dp.message_handler(commands='me')
+async def get_user_profile(message: types.Message):
+    state = dp.current_state(user=message.from_user.id)
+    user_data = await state.get_data()
+    group= user_data['group']
+    # Check if bot was restarted and in state not saved group
+    if not user_data.get('group'):
+        group = db.get_user_group(tgid=message.from_user.id)
+        if not group:
+            return await message.answer(escape_md('Сначала зарегистрируйся, иначе как я узнаю твою группу?🤔\nНажми сюда: /start'))
+        await state.update_data(group=group)
+    
+    text = craft_user_profile(message, group)
+    await message.answer(text)
+
+@dp.message_handler(commands='dev')
+async def show_developers(message: types.Message):
+    data = text(
+        "Разработчик интерфейса: ",
+        bold("@delvinru"),
+        "\nРазработчик парсера: ",
+        bold("@ozzero"),
+        "\nПо любым вопросам, предложениям по улучшению бота, можно писать в личку\.",
+        sep = ""
+    )
+    await message.answer(data)
 
 @dp.message_handler(commands='update_db')
 async def admin_update_db(message: types.Message):
