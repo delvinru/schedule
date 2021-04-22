@@ -1,14 +1,15 @@
 import re
 
-from aiogram import types, Dispatcher
+import xlparser.parser as parser
+from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.utils.markdown import escape_md
 from loguru import logger
-from pprint import pprint
 
-from util.settings import dp, db
-from util.states import *
 from util.helpers import *
+from util.settings import ADMINS, db, dp
+from util.states import *
+
 
 @dp.message_handler(commands='start')
 async def start(message: types.Message):
@@ -69,3 +70,11 @@ async def get_week(message: types.Message):
     result = db.get_user_group(tgid=message.from_user.id)
     text = craft_schedule(result, 2)
     await message.answer(escape_md(text))
+
+@dp.message_handler(lambda msg: msg.from_user.id in ADMINS)
+@dp.message_handler(commands='update_db')
+async def admin_feature(message: types.Message):
+    """ Admin feature for update database """
+
+    parser.update_MireaSchedule()
+    await message.answer('База данных успешно обновлена!')

@@ -12,6 +12,7 @@ pg_pwd = os.getenv('POSTGRES_PASSWORD') or ''
 pg_host = 'database'
 pg_port = '5432'
 
+ADMINS = [258229531]
 
 bot = Bot(token=TOKEN, parse_mode=types.ParseMode.MARKDOWN_V2)
 storage = MemoryStorage()

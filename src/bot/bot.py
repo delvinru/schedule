@@ -12,10 +12,6 @@ import xlparser.parser as parser
 async def main():
     """ Start long polling """
 
-    # Init table on startup
-    # TODO: made this as admin feauture
-    # parser.update_MireaSchedule()
-
     # Start long pollings for bot
     await dp.start_polling()
 
