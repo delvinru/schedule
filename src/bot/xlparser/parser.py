@@ -106,6 +106,18 @@ def get_WeekNumber(today):
     delta_day = abs((today - ZeroDay).days)
     return delta_day // 7 + 1
 
+def check_GroupExist(group):
+    '''
+    Проверяет существование группы в базе
+    '''
+
+    cur = tm.select_group(group)
+
+    if len(cur) == 0:
+        return False
+    else:
+        return True
+
 
 def _check_tags(tags, line):
     '''
