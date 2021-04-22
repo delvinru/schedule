@@ -21,7 +21,9 @@ docker-compose up --build
 
 
 ### TODO:
-- [✓] Add parser for schedule
-- [ ] Save user state in database
-- [ ] Make an interactive menu
-- [ ] Think about the output in messages
+- [x] Add parser for schedule
+- [x] Save user state in database
+- [x] Make an interactive menu
+- [x] Think about the output in messages
+- [ ] Think about how to remove garbage from handlers
+- [ ] Add a schedule display function
