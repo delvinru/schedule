@@ -1,7 +1,8 @@
 from datetime import date
 
 import xlparser.parser as parser
-from aiogram.utils.markdown import text, bold
+from aiogram import types
+from aiogram.utils.markdown import bold, text
 
 
 def parse_day(data: list, one_day: bool) -> str:
@@ -57,4 +58,15 @@ def craft_week_message() -> str:
     today = date.today()
     week = parser.get_WeekNumber(today)
     data = text("Текущая неделя: ", bold(str(week)))
+    return data
+
+def craft_user_profile(message: types.Message, group: str) -> str:
+    data = text(
+        "Профиль:\n",
+        "Имя пользователя: ",
+        bold(message.from_user.username),
+        "\nГруппа: ",
+        bold(group),
+        sep=""
+    )
     return data
