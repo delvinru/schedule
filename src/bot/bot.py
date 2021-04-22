@@ -18,6 +18,7 @@ async def set_commands(bot: Bot):
         BotCommand(command='/next',    description='Узнать расписание на завтра'),
         BotCommand(command='/week',    description='Узнать расписание на неделю'),
         BotCommand(command='/getweek', description='Получить номер текущей недели'),
+        BotCommand(command='/time',    description='Узнать время занятий'),
         BotCommand(command='/me',      description='Мой профиль'),
         BotCommand(command='/update',  description='Указать новую группу'),
         BotCommand(command='/dev',     description='Узнать разработчиков бота')

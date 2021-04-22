@@ -137,6 +137,11 @@ async def get_current_week(message: types.Message):
     text = craft_week_message()
     await message.answer(text)
 
+@dp.message_handler(commands='time')
+async def get_time_schedule(message: types.Message):
+    text = craft_time_schedule()
+    await message.answer(text)
+
 @dp.message_handler(commands='me')
 async def get_user_profile(message: types.Message):
     state = dp.current_state(user=message.from_user.id)

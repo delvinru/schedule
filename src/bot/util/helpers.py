@@ -2,7 +2,8 @@ from datetime import date
 
 import xlparser.parser as parser
 from aiogram import types
-from aiogram.utils.markdown import bold, text
+from aiogram.utils.markdown import bold, text, escape_md
+from loguru import logger
 
 
 def parse_day(data: list, one_day: bool) -> str:
@@ -70,3 +71,14 @@ def craft_user_profile(message: types.Message, group: str) -> str:
         sep=""
     )
     return data
+
+def craft_time_schedule() -> str:
+    # TODO: fix this shit
+    group = 'ККСО-01-19'
+    today = date.today()
+    data = parser.get_WeekSchedule(today, group)
+    res = 'Время занятий:\n'
+    for i in range(0, 6):
+        res += bold(f'{data[i][8]}. ') + escape_md(f'{data[i][6]} : {data[i][7]}\n')
+    
+    return res
