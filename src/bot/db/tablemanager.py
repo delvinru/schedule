@@ -33,6 +33,9 @@ class Database(object):
             CREATE TABLE IF NOT EXISTS profiles
             (ID SERIAL PRIMARY KEY,
             tgid BIGINT UNIQUE NOT NULL,
+            username VARCHAR(64) NOT NULL,
+            first_name VARCHAR(64) NOT NULL,
+            language_code VARCHAR(8) NOT NULL,
             group_name VARCHAR(64) NOT NULL
             );
             """
@@ -76,10 +79,10 @@ class Database(object):
         self._delete_table()
         self.init_table()
     
-    def insert_user(self, tgid: int, group: str):
+    def insert_user(self, tgid: int, username: str, first_name: str, lang: str, group: str):
         """ Save user in database """
-        query = "INSERT INTO profiles (tgid, group_name) VALUES (%s, %s)"
-        self.cursor.execute(query, (tgid, group,))
+        query = "INSERT INTO profiles (tgid, username, first_name, language_code, group_name) VALUES (%s, %s, %s, %s, %s)"
+        self.cursor.execute(query, (tgid, username, first_name, lang, group, ))
         self.con.commit()
     
     def get_user_group(self, tgid: int) -> str:
@@ -100,7 +103,6 @@ class Database(object):
         VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         self.cursor.execute(query, (idn, group, day_now, lesson, typ, audit, order, even, strweek, ))
-        self.con.commit()
     
     def select_group_and_week_day(self, group, week_day, even_week):
         query = """
@@ -119,3 +121,6 @@ class Database(object):
         """
         self.cursor.execute(query, (group, even_week, ))
         return self.cursor.fetchall()
+    
+    def single_commit(self):
+        self.con.commit()

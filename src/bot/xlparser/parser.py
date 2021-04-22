@@ -24,7 +24,7 @@ def update_MireaSchedule():
     get_xlfiles(cfg.links_file)
 
     # full_groups_shedule = {}
-    
+
     for filename in os.listdir("./xlparser/xl"):
         # * Полный список групп с расписанием * #
         groups_shedule = parse_xlfiles(filename, cfg.block_tags, cfg.special_tags, cfg.substitute_lessons)
@@ -44,6 +44,7 @@ def update_MireaSchedule():
     # with open("./json/AllInOne.json", "w", encoding="utf-8") as f:                        # Создание одной большой базы
     #     json.dump(full_groups_shedule, f, sort_keys=True, indent=4, ensure_ascii=False)
     
+    tm.single_commit()
     logger.info("Database updated succefully!")
 
 def get_TodaySchedule(today, group):

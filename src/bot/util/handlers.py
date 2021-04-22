@@ -46,7 +46,13 @@ async def process_group(message: types.Message, state: FSMContext):
     user_data = await state.get_data()
 
     await message.answer(f"Группа: {escape_md(user_data['group'])} успешно установлена\!")
-    db.insert_user(tgid=message.from_user.id, group=user_data['group'])
+    db.insert_user(
+        tgid=message.from_user.id,
+        username=message.from_user.username,
+        first_name=message.from_user.first_name,
+        lang=message.from_user.language_code,
+        group=user_data['group']
+    )
     logger.info(f"User successfully registered: {message.from_user.first_name} with group {user_data['group']}")
     await state.finish()
 
@@ -71,10 +77,11 @@ async def get_week(message: types.Message):
     text = craft_schedule(result, 2)
     await message.answer(escape_md(text))
 
-@dp.message_handler(lambda msg: msg.from_user.id in ADMINS)
 @dp.message_handler(commands='update_db')
 async def admin_feature(message: types.Message):
     """ Admin feature for update database """
+    if message.from_user.id not in ADMINS:
+        return await message.answer(escape_md("Извини, но у тебя нет прав на это🤷‍♂️"))
 
     await message.answer(escape_md('Начал обновлять базу. Это может занять некоторое время...'))
     parser.update_MireaSchedule()
