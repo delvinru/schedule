@@ -182,5 +182,9 @@ async def admin_update_db(message: types.Message):
         return await message.answer(escape_md("Извини, но у тебя нет прав на это!🤷‍♂️"))
 
     await message.answer(escape_md('Начал обновлять базу. Это может занять некоторое время...'))
-    parser.update_MireaSchedule()
-    await message.answer('База данных успешно обновлена\!')
+    try:
+        parser.update_MireaSchedule()
+    except:
+        await message.answer('Что-то пошло не так/!')
+    else:
+        await message.answer('База данных успешно обновлена\!')
