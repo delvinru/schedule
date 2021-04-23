@@ -55,7 +55,7 @@ async def process_group(message: types.Message, state: FSMContext):
 
     user_data = await state.get_data()
     if not user_data.get('group'):
-        await state.update_data(group=message.text.upper())
+        await state.update_data(group=find_group.group(0).upper())
         user_data = await state.get_data()
 
         await message.answer(f"Группа: {escape_md(user_data['group'])} успешно установлена\!")
@@ -75,7 +75,7 @@ async def process_group(message: types.Message, state: FSMContext):
         logger.info(f"User successfully registered: {message.from_user.first_name} with group {user_data['group']}")
         await state.reset_state(with_data=False)
     else:
-        await state.update_data(group=message.text.upper())
+        await state.update_data(group=find_group.group(0).upper())
         user_data = await state.get_data()
         db.update_user_info(tgid=message.from_user.id, group=user_data['group'])
         await message.answer(f"Группа: {escape_md(user_data['group'])} успешно обновлена\!")
