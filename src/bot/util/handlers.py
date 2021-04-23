@@ -55,7 +55,7 @@ async def process_group(message: types.Message, state: FSMContext):
 
     user_data = await state.get_data()
     if not user_data.get('group'):
-        await state.update_data(group=message.text.upper())
+        await state.update_data(group=find_group.group(0).upper())
         user_data = await state.get_data()
 
         await message.answer(f"Группа: {escape_md(user_data['group'])} успешно установлена\!")
@@ -77,7 +77,7 @@ async def process_group(message: types.Message, state: FSMContext):
     else:
         await state.update_data(group=message.text.upper())
         user_data = await state.get_data()
-        db.update_user_info(tgid=message.from_user.id, group=user_data['group'])
+        db.update_user_info(tgid=find_group.group(0).id, group=user_data['group'])
         await message.answer(f"Группа: {escape_md(user_data['group'])} успешно обновлена\!")
         logger.info(f"Group updated for user {message.from_user.id}")
         await state.reset_state(with_data=False)
