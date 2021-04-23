@@ -9,8 +9,9 @@ def update_MireaSchedule()
 def get_TodaySchedule(today, group)
 def get_TomorrowSchedule(today, group)
 def get_WeekSchedule(today, group)
+def get_NextweekSchedule(today, group)
 ```
-Возвращает список с расписанием группы на сегодня, завтра или на текущую неделю в следующем формате:
+Возвращает список с расписанием группы на сегодня/завтра или на текущую/следующую неделю в следующем формате:
 ```python
 schedule = [ident, lesson, typ, audit, start_time, end_time, order, even, week]
 # 0 - ident        - идентификатор занятия в базе данных

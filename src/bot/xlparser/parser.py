@@ -52,10 +52,10 @@ def get_TodaySchedule(today, group):
     Возвращает расписание [список] группы на сегодня. Возвращает None, если вызов произошел в воскресенье.
     '''
 
-    ZeroDay = date(cfg.semestr_start[0], cfg.semestr_start[1], cfg.semestr_start[2])
-    delta_day = abs((today - ZeroDay).days)
-    
-    week_number = delta_day // 7 + 1
+    week_number = get_WeekNumber(today)
+    if week_number > 17:
+        week_number = 17
+
     even_week = _get_even_week(week_number)
     week_day = _get_week_day(today.weekday())
     if week_day == "ВОСКРЕСЕНЬЕ":
@@ -79,15 +79,13 @@ def get_TomorrowSchedule(today, group):
 
 def get_WeekSchedule(today, group):
     '''
-    Возвращает расписание [список] группы на неделю.
+    Возвращает расписание [список] группы на текущую неделю.
     '''
-
-    ZeroDay = date(cfg.semestr_start[0], cfg.semestr_start[1], cfg.semestr_start[2])
-    delta_day = abs((today - ZeroDay).days)
-    
-    week_number = delta_day // 7 + 1
+    week_number = get_WeekNumber(today)
+    if week_number > 17:
+        week_number = 17
     even_week = _get_even_week(week_number)
-
+    
     cur = tm.select_group_and_even_week(group, even_week)
 
     result = []
@@ -97,6 +95,13 @@ def get_WeekSchedule(today, group):
             result.append(answer)
 
     return result
+
+def get_NextweekSchedule(today, group):
+    '''
+    Возвращает расписание [список] группы на следующую неделю.
+    '''
+    td = date(today.year, today.month, today.day + 7)
+    return get_WeekSchedule(td, group)
 
 def get_WeekNumber(today):
     '''
