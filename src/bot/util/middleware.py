@@ -1,3 +1,5 @@
+from typing import Union
+
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.utils.markdown import escape_md
@@ -5,7 +7,7 @@ from aiogram.utils.markdown import escape_md
 from util.settings import db
 
 
-async def check_state(message: types.Message, state: FSMContext):
+async def check_state(message: Union[types.Message, types.CallbackQuery], state: FSMContext):
     user_data = await state.get_data()
     # Check if bot was restarted and in state not saved group
     if not user_data.get('group'):

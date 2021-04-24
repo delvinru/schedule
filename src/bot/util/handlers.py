@@ -1,17 +1,19 @@
+import datetime
 import re
+from datetime import date
 
-import xlparser.parser as parser
 from aiogram import types
+import aiogram
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.handler import CancelHandler
 from aiogram.utils.markdown import bold, escape_md, text
 from loguru import logger
 
 from util.helpers import *
+from util.keyboards import craft_paging_keyboard, craft_startup_keyboard
 from util.middleware import check_state
-from util.settings import ADMINS, db, dp
+from util.settings import ADMINS, db, dp, bot
 from util.states import *
-from util.keyboards import craft_startup_keyboard
 
 
 @dp.message_handler(commands='start')
@@ -174,6 +176,84 @@ async def show_developers(message: types.Message):
         sep = ""
     )
     await message.answer(data)
+
+@dp.callback_query_handler(text='prev_week')
+async def process_prev_week(query: types.CallbackQuery):
+    logger.info(f'User {query.from_user.id} request decrease a page')
+
+    state = dp.current_state(user=query.from_user.id)
+
+    # TODO: fix state check
+    # Check state
+    if not await check_state(query, state):
+        raise CancelHandler()
+
+    user_data = await state.get_data()
+
+    # Decrease weeks
+    current_week = user_data['page']
+    if not (parser.get_WeekNumber(current_week) <= 1):
+        current_week -= datetime.timedelta(days=7)
+    
+    await state.update_data(page=current_week)
+    text = craft_schedule(user_data['group'], mode=2, special_date=current_week)
+    keyboard = craft_paging_keyboard()
+
+    # Catch if user got border
+    try:
+        await query.message.edit_text(escape_md(text), reply_markup=keyboard)
+        await bot.answer_callback_query(query.id)
+    except aiogram.utils.exceptions.MessageNotModified:
+        await bot.answer_callback_query(query.id, text='Вы достигли начала расписания\nДальше двигаться некуда', show_alert=True)
+
+@dp.callback_query_handler(text='next_week')
+async def process_next_week(query: types.CallbackQuery):
+    logger.info(f'User {query.from_user.id} request increase a page')
+
+    state = dp.current_state(user=query.from_user.id)
+    user_data = await state.get_data()
+
+    # TODO: fix state check
+    # Check state
+    if not await check_state(query, state):
+        raise CancelHandler()
+
+    # Increase weeks
+    # current_week = user_data['page'] + datetime.timedelta(days=7)
+    current_week = user_data['page']
+    if not (parser.get_WeekNumber(current_week) >= 17):
+        current_week += datetime.timedelta(days=7)
+    
+    await state.update_data(page=current_week)
+    text = craft_schedule(user_data['group'], mode=2, special_date=current_week)
+    keyboard = craft_paging_keyboard()
+    try:
+        await query.message.edit_text(escape_md(text), reply_markup=keyboard)
+        await bot.answer_callback_query(query.id)
+    except aiogram.utils.exceptions.MessageNotModified:
+        await bot.answer_callback_query(query.id, text='Вы достигли конца расписания\nДальше двигаться некуда', show_alert=True)
+
+
+@dp.message_handler(commands='pages', state='*')
+async def show_week_page(message: types.Message):
+    logger.info(f'User {message.from_user.id} request a pages function')
+
+    state = dp.current_state(user=message.from_user.id)
+
+    if not await check_state(message, state):
+        raise CancelHandler()
+    
+    user_data = await state.get_data()
+    group = user_data['group']
+
+    # Setup for user
+    text = craft_schedule(group, mode=2)
+    keyboard = craft_paging_keyboard()
+
+    # Update page state
+    await state.update_data(page=date.today())
+
+    await message.answer(escape_md(text), reply_markup=keyboard)
 
 @dp.message_handler(commands='update_db')
 async def admin_update_db(message: types.Message):

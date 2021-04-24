@@ -41,7 +41,7 @@ def parse_day(data: list, one_day: bool) -> str:
     res = header + '\n'.join(lessons)
     return res
 
-def craft_schedule(group: str, mode: int) -> str:
+def craft_schedule(group: str, mode: int, special_date = None) -> str:
     """
     Craft schedule for user
 
@@ -49,10 +49,14 @@ def craft_schedule(group: str, mode: int) -> str:
 
     mode: int: 
     
-        0 - today, 1 - tomorrow, 1 - week
+        0 - today, 1 - tomorrow, 2 - week
     """
 
     today = date.today()
+
+    if special_date:
+        today = special_date
+
     data = []
     res = ''
     if mode == 0:
