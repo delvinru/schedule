@@ -1,4 +1,5 @@
 from datetime import date
+import datetime
 
 import xlparser.parser as parser
 from aiogram import types
@@ -19,40 +20,76 @@ def parse_day(data: list, one_day: bool) -> str:
         if lesson[5] != 'Д':
             flag = False
 
-    if flag:
+    empty_day = not any([lesson[3] for lesson in data])
+
+    if flag and not empty_day:
         if one_day:
             header += 'Дистанционное обучение\n\n'
         else:
             header += 'Дистанционное обучение\n'
-    else:
+    elif not flag and not empty_day:
         if one_day:
             header += 'Очные занятия\n\n'
         else:
             header += 'Очные занятия\n'
+    elif empty_day:
+        if one_day:
+            header += 'День самостоятельных занятий\n\n'
+        else:
+            header += 'День самостоятельных занятий\n'
 
     res = header + '\n'.join(lessons)
     return res
 
 def craft_schedule(group: str, mode: int) -> str:
-    today = date.today()
+    """
+    Craft schedule for user
+
+    group:str - user group
+
+    mode: int: 
+    
+        0 - today, 1 - tomorrow, 1 - week
+    """
+
+    # today = date.today()
+    today = datetime.date(2021, 4, 24)
     data = []
     res = ''
     if mode == 0:
+        # Check if schedule was requested in sunday, then return next monday
+        if today.weekday() == 6:
+            today += datetime.timedelta(days=1)
         data = parser.get_TodaySchedule(today, group)
     elif mode == 1:
+        # Catch if schedule requested in saturday
+        if today.weekday() == 5:
+            today += datetime.timedelta(days=1)
         data = parser.get_TomorrowSchedule(today, group)
+        # Fix for week number
+        today += datetime.timedelta(days=1)
     elif mode == 2:
         data = parser.get_WeekSchedule(today, group)
 
     if mode == 0 or mode == 1:
         # Parsing today and next similar
-        res = parse_day(data, one_day=True)
+        try:
+            res = parse_day(data, one_day=True)
+        except:
+            return 'Возникла ошибочка в получении расписания!'
     elif mode == 2:
-        n = len(data)
-        # 6 - count of days
-        for i in range(n//6):
-            res += parse_day(data[i*6:6*(i+1)], one_day=False) + '\n\n'
-
+        # Parsing week schedule
+        day = []
+        day_id = data[0][2]
+        for lesson in data:
+            if day_id == lesson[2]:
+                day.append(lesson)
+            else:
+                res += parse_day(day, one_day=False) + '\n\n'
+                day = []
+                day_id = lesson[2]
+                day.append(lesson)
+    res = 'Текущая неделя: ' + str(parser.get_WeekNumber(today)) + '\n' + res
     return res
 
 def craft_week_message() -> str:
