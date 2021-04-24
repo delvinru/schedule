@@ -18,12 +18,13 @@ def update_MireaSchedule():
     links.txt - список всех ссылок с сайта. Функция очень время затратная, поэтому лучше включать её только вручную, когда это необходимо. \n
     Функция сначала обрабатывает все файлы, и только после окончания работы загружает их в базу.  
     '''
-    tm.clear_Schedule()
 
     get_links(cfg.link_MireaShedule, cfg.links_file)
     get_xlfiles(cfg.links_file)
 
     # full_groups_shedule = {}
+    
+    tm.clear_Schedule() # Сначала подключаемся и скачиваем файлы, а только потом удаляем базу
 
     for filename in os.listdir("./xlparser/xl"):
         # * Полный список групп с расписанием * #
@@ -135,6 +136,18 @@ def get_WeekList(today, group):
     # for answer in cur:
         # result.append(answer)
     return cur
+
+def get_TimeSchedule(today, group):
+    '''
+    Возвращает список пар времени начала/конца занятий
+    '''
+    time_sch = []
+    cur = get_TodayList(today, group)
+
+    for each in cur:
+        time_sch.append((each[6], each[7]))
+    
+    return time_sch
 
 def check_GroupExist(group):
     '''

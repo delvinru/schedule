@@ -88,6 +88,8 @@ def convert_in_postgres(group_schedule, con)
 - [x] Add README for Parser
 - [x] Connection to base using Class
 - [x] Use to connection environment variable
+- [x] One permanent or Much short-time connection to base? Short.
+- [x] Think about rational storage use (needed .json and .xlsx in permanent storage? 🤔) Json, bye-bye.
 - [ ] Short form of long-named lesson
-- [ ] One permanent or Much short-time connection to base?
-- [ ] Think about rational storage use (needed .json and .xlsx in permanent storage? 🤔)
+- [ ] Exams parser
+- [ ] Lectors data
