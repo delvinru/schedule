@@ -1,7 +1,12 @@
 #  MIREA schedule
+
 ---
 
-#### How initialize bot
+The bot lives here: [Расписание МИРЭА](https://t.me/scheduleHEIbot)
+
+---
+
+### How to initialize a bot
 
 Don't forget to change the telegram token and password from the database
 
@@ -11,19 +16,37 @@ echo POSTGRES_USER=pguser >> .env
 echo POSTGRES_PASSWORD=superpassword >> .env
 echo POSTGRES_DB=schedule >> .env
 ```
+---
 
-### How start bot
+### How to launch a bot
 
 ```bash
 docker-compose up --build
 ```
+---
 
+### Logging
+The bot maintains basic logging for convenient error handling. The logs can be found in the file `src/bot/logs/debug.log`.
 
+---
 
 ### TODO:
+- [ ] Create paging throw weeks
+- [ ] Create buttons in bottom menu for `today`, `tomorrow`, `week` functions
+- [ ] Create parser for exams
+- [ ] Think about rofl output, xD
+
+### Done:
 - [x] Add parser for schedule
 - [x] Save user state in database
 - [x] Make an interactive menu
 - [x] Think about the output in messages
-- [ ] Think about how to remove garbage from handlers
-- [ ] Add a schedule display function
+- [x] Think about how to remove garbage from handlers
+- [x] Add a schedule display function
+
+---
+
+### Developers/Contacts
+
+* [Kolesnikov Alexey](https://vk.com/delvinru) - UI/UX, Bot logic, App architect
+* [Zherebtsov Kirill](https://vk.com/id179026080) -  Schedule parser
