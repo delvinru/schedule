@@ -51,17 +51,14 @@ def get_TodaySchedule(today, group):
     '''
     Возвращает расписание [список] группы на сегодня. Возвращает None, если вызов произошел в воскресенье.
     '''
-
     week_number = get_WeekNumber(today)
     if week_number > 17:
         week_number = 17
 
-    even_week = _get_even_week(week_number)
-    week_day = _get_week_day(today.weekday())
-    if week_day == "ВОСКРЕСЕНЬЕ":
+    cur = get_TodayList(today, group)
+    if cur == None:
         return None
 
-    cur = tm.select_group_and_week_day(group, week_day, even_week)
     result = []
     for answer in cur:
         weeks_av = answer[10]
@@ -84,9 +81,10 @@ def get_WeekSchedule(today, group):
     week_number = get_WeekNumber(today)
     if week_number > 17:
         week_number = 17
-    even_week = _get_even_week(week_number)
     
-    cur = tm.select_group_and_even_week(group, even_week)
+    cur = get_WeekList(today, group)
+    if cur == None:
+        return None
 
     result = []
     for answer in cur:
@@ -111,6 +109,33 @@ def get_WeekNumber(today):
     delta_day = abs((today - ZeroDay).days)
     return delta_day // 7 + 1
 
+def get_TodayList(today, group):
+    week_number = get_WeekNumber(today)
+    if week_number > 17:
+        week_number = 17
+    even_week = _get_even_week(week_number)
+    week_day = _get_week_day(today.weekday())
+    if week_day == "ВОСКРЕСЕНЬЕ":
+        return None
+    
+    cur = tm.select_group_and_week_day(group, week_day, even_week)
+    # result = []
+    # for answer in cur:
+    #     result.append(answer)
+    return cur
+
+def get_WeekList(today, group):
+    week_number = get_WeekNumber(today)
+    if week_number > 17:
+        week_number = 17
+    even_week = _get_even_week(week_number)
+    
+    cur = tm.select_group_and_even_week(group, even_week)
+    # result = []
+    # for answer in cur:
+        # result.append(answer)
+    return cur
+
 def check_GroupExist(group):
     '''
     Проверяет существование группы в базе
@@ -123,6 +148,16 @@ def check_GroupExist(group):
     else:
         return True
 
+
+
+
+
+
+
+
+
+
+# ---- Ниже будет сложно ---- #
 
 def _check_tags(tags, line):
     '''

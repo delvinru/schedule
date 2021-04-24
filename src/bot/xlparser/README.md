@@ -44,6 +44,12 @@ def check_GroupExist(grp)
 ```
 Возвращает True, если группа есть в базе, и False в противном случае
 
+```python
+def get_WeekList(today, group)
+def get_TodayList(today, group)
+```
+Возвращает расписание на неделю/сегодня прямо из базы без доп. обработок.
+
 ### Другое
 ```python
 def get_links(link, filename="links.txt")
