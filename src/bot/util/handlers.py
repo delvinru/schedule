@@ -3,10 +3,12 @@ import re
 import xlparser.parser as parser
 from aiogram import types
 from aiogram.dispatcher import FSMContext
-from aiogram.utils.markdown import escape_md, text, bold
+from aiogram.dispatcher.handler import CancelHandler
+from aiogram.utils.markdown import bold, escape_md, text
 from loguru import logger
 
 from util.helpers import *
+from util.middleware import check_state
 from util.settings import ADMINS, db, dp
 from util.states import *
 
@@ -84,15 +86,12 @@ async def process_group(message: types.Message, state: FSMContext):
 
 @dp.message_handler(commands='today', state='*')
 async def get_today(message: types.Message):
-    state = dp.current_state(user=message.from_user.id)
-    user_data = await state.get_data()
+    logger.info(f'User {message.from_user.id} request today schedule')
 
-    # Check if bot was restarted and in state not saved group
-    if not user_data.get('group'):
-        group = db.get_user_group(tgid=message.from_user.id)
-        if not group:
-            return await message.answer(escape_md('Сначала зарегистрируйся, иначе как я узнаю твою группу?🤔\nНажми сюда: /start'))
-        await state.update_data(group=group)
+    state = dp.current_state(user=message.from_user.id)
+
+    if not await check_state(message, state):
+        raise CancelHandler()
 
     user_data = await state.get_data()
     group = user_data['group']
@@ -101,15 +100,11 @@ async def get_today(message: types.Message):
 
 @dp.message_handler(commands='next', state='*')
 async def get_tomorrow(message: types.Message):
+    logger.info(f'User {message.from_user.id} request tomorrow schedule')
     state = dp.current_state(user=message.from_user.id)
-    user_data = await state.get_data()
 
-    # Check if bot was restarted and in state not saved group
-    if not user_data.get('group'):
-        group = db.get_user_group(tgid=message.from_user.id)
-        if not group:
-            return await message.answer(escape_md('Сначала зарегистрируйся, иначе как я узнаю твою группу?🤔\nНажми сюда: /start'))
-        await state.update_data(group=group)
+    if not await check_state(message, state):
+        raise CancelHandler()
 
     user_data = await state.get_data()
     group = user_data['group']
@@ -118,15 +113,11 @@ async def get_tomorrow(message: types.Message):
 
 @dp.message_handler(commands='week', state='*')
 async def get_week(message: types.Message):
+    logger.info(f'User {message.from_user.id} request week schedule')
     state = dp.current_state(user=message.from_user.id)
-    user_data = await state.get_data()
 
-    # Check if bot was restarted and in state not saved group
-    if not user_data.get('group'):
-        group = db.get_user_group(tgid=message.from_user.id)
-        if not group:
-            return await message.answer(escape_md('Сначала зарегистрируйся, иначе как я узнаю твою группу?🤔\nНажми сюда: /start'))
-        await state.update_data(group=group)
+    if not await check_state(message, state):
+        raise CancelHandler()
 
     user_data = await state.get_data()
     group = user_data['group']
@@ -140,31 +131,34 @@ async def update_user_group(message: types.Message, state: FSMContext):
 
 @dp.message_handler(commands='getweek')
 async def get_current_week(message: types.Message):
+    logger.info(f'User {message.from_user.id} request get week')
     text = craft_week_message()
     await message.answer(text)
 
 @dp.message_handler(commands='time')
 async def get_time_schedule(message: types.Message):
+    logger.info(f'User {message.from_user.id} request time')
     text = craft_time_schedule()
     await message.answer(text)
 
 @dp.message_handler(commands='me')
 async def get_user_profile(message: types.Message):
+    logger.info(f'User {message.from_user.id} request themself profile')
     state = dp.current_state(user=message.from_user.id)
+
+    if not await check_state(message, state):
+        raise CancelHandler()
+
     user_data = await state.get_data()
     group= user_data['group']
-    # Check if bot was restarted and in state not saved group
-    if not user_data.get('group'):
-        group = db.get_user_group(tgid=message.from_user.id)
-        if not group:
-            return await message.answer(escape_md('Сначала зарегистрируйся, иначе как я узнаю твою группу?🤔\nНажми сюда: /start'))
-        await state.update_data(group=group)
     
     text = craft_user_profile(message, group)
     await message.answer(text)
 
 @dp.message_handler(commands='dev')
 async def show_developers(message: types.Message):
+    logger.info(f'User {message.from_user.id} request developer info')
+
     data = text(
         "Разработчик интерфейса: ",
         bold("@delvinru"),
@@ -178,6 +172,7 @@ async def show_developers(message: types.Message):
 @dp.message_handler(commands='update_db')
 async def admin_update_db(message: types.Message):
     """ Admin feature for update database """
+    logger.info(f'User {message.from_user.id} request admin feauture')
     if message.from_user.id not in ADMINS:
         return await message.answer(escape_md("Извини, но у тебя нет прав на это!🤷‍♂️"))
 
