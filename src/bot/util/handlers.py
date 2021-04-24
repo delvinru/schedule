@@ -11,6 +11,7 @@ from util.helpers import *
 from util.middleware import check_state
 from util.settings import ADMINS, db, dp
 from util.states import *
+from util.keyboards import craft_startup_keyboard
 
 
 @dp.message_handler(commands='start')
@@ -26,7 +27,8 @@ async def start(message: types.Message):
         logger.info(f"User came to registration menu: {message.from_user.first_name}")
         state = dp.current_state(user=message.from_user.id)
         await state.set_state(User.group)
-        await message.answer(text)
+        keyboard = craft_startup_keyboard()
+        await message.answer(text, reply_markup=keyboard)
     else:
         # Creating a user state in memory to avoid constant database requests
         state = dp.current_state(user=message.from_user.id)
@@ -84,6 +86,7 @@ async def process_group(message: types.Message, state: FSMContext):
         logger.info(f"Group updated for user {message.from_user.id}")
         await state.reset_state(with_data=False)
 
+@dp.message_handler(regexp='^Сегодня$')
 @dp.message_handler(commands='today', state='*')
 async def get_today(message: types.Message):
     logger.info(f'User {message.from_user.id} request today schedule')
@@ -96,8 +99,10 @@ async def get_today(message: types.Message):
     user_data = await state.get_data()
     group = user_data['group']
     text = craft_schedule(group, mode=0)
-    await message.answer(escape_md(text))
+    keyboard = craft_startup_keyboard()
+    await message.answer(escape_md(text), reply_markup=keyboard)
 
+@dp.message_handler(regexp='^Завтра$')
 @dp.message_handler(commands='next', state='*')
 async def get_tomorrow(message: types.Message):
     logger.info(f'User {message.from_user.id} request tomorrow schedule')
@@ -111,6 +116,7 @@ async def get_tomorrow(message: types.Message):
     text = craft_schedule(group, mode=1)
     await message.answer(escape_md(text))
 
+@dp.message_handler(regexp='^Неделя$')
 @dp.message_handler(commands='week', state='*')
 async def get_week(message: types.Message):
     logger.info(f'User {message.from_user.id} request week schedule')

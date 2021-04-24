@@ -52,8 +52,7 @@ def craft_schedule(group: str, mode: int) -> str:
         0 - today, 1 - tomorrow, 1 - week
     """
 
-    # today = date.today()
-    today = datetime.date(2021, 4, 24)
+    today = date.today()
     data = []
     res = ''
     if mode == 0:
