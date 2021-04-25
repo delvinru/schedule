@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Union
 
 from aiogram import types
@@ -19,5 +20,5 @@ async def check_state(message: Union[types.Message, types.CallbackQuery], state:
                     '\nНажми сюда: /start'
                     )))
             return False
-        await state.update_data(group=group)
+        await state.update_data(group=group, page=date.today())
     return True

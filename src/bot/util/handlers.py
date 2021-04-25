@@ -34,7 +34,7 @@ async def start(message: types.Message):
     else:
         # Creating a user state in memory to avoid constant database requests
         state = dp.current_state(user=message.from_user.id)
-        await state.update_data(group=result)
+        await state.update_data(group=result, page=date.today())
 
         # By default show today schedule
         await get_today(message)
@@ -146,7 +146,14 @@ async def get_current_week(message: types.Message):
 @dp.message_handler(commands='time')
 async def get_time_schedule(message: types.Message):
     logger.info(f'User {message.from_user.id} request time')
-    text = craft_time_schedule()
+    state = dp.current_state(user=message.from_user.id)
+
+    if not await check_state(message, state):
+        raise CancelHandler()
+
+    user_data = await state.get_data()
+    group = user_data['group']
+    text = craft_time_schedule(group)
     await message.answer(text)
 
 @dp.message_handler(commands='me')
@@ -183,7 +190,6 @@ async def process_prev_week(query: types.CallbackQuery):
 
     state = dp.current_state(user=query.from_user.id)
 
-    # TODO: fix state check
     # Check state
     if not await check_state(query, state):
         raise CancelHandler()
@@ -213,7 +219,6 @@ async def process_next_week(query: types.CallbackQuery):
     state = dp.current_state(user=query.from_user.id)
     user_data = await state.get_data()
 
-    # TODO: fix state check
     # Check state
     if not await check_state(query, state):
         raise CancelHandler()

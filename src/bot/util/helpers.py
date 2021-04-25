@@ -112,13 +112,19 @@ def craft_user_profile(message: types.Message, group: str) -> str:
     )
     return data
 
-def craft_time_schedule() -> str:
-    # TODO: fix this shit
-    group = 'ККСО-01-19'
+def craft_time_schedule(group: str) -> str:
     today = date.today()
-    data = parser.get_WeekSchedule(today, group)
-    res = 'Время занятий:\n'
-    for i in range(0, 6):
-        res += bold(f'{data[i][8]}. ') + escape_md(f'{data[i][6]} : {data[i][7]}\n')
+    logger.info(f'Get group: {group}')
+    try:
+        data = parser.get_TimeSchedule(today, group)
+        logger.info(f'Get data: {data}')
+    except Exception as e:
+        logger.warning(e)
+        return 'Oops'
+
+
+    res = bold('Время занятий:\n', sep="")
+    for i, el in enumerate(data):
+        res += text(bold(str(i+1)), el[0], " : ", el[1], "\n", sep="")
     
     return res
