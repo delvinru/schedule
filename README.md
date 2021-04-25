@@ -31,12 +31,12 @@ The bot maintains basic logging for convenient error handling. The logs can be f
 ---
 
 ### TODO:
-- [ ] Create paging throw weeks
-- [ ] Create buttons in bottom menu for `today`, `tomorrow`, `week` functions
 - [ ] Create parser for exams
 - [ ] Think about rofl output, xD
 
 ### Done:
+- [x] Create paging throw weeks
+- [x] Create buttons in bottom menu for `today`, `tomorrow`, `week` functions
 - [x] Add parser for schedule
 - [x] Save user state in database
 - [x] Make an interactive menu
