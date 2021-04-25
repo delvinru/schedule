@@ -102,7 +102,7 @@ async def get_today(message: types.Message):
     group = user_data['group']
     text = craft_schedule(group, mode=0)
     keyboard = craft_startup_keyboard()
-    await message.answer(escape_md(text), reply_markup=keyboard)
+    await message.answer(text, reply_markup=keyboard)
 
 @dp.message_handler(regexp='^Завтра$')
 @dp.message_handler(commands='next', state='*')
@@ -116,7 +116,7 @@ async def get_tomorrow(message: types.Message):
     user_data = await state.get_data()
     group = user_data['group']
     text = craft_schedule(group, mode=1)
-    await message.answer(escape_md(text))
+    await message.answer(text)
 
 @dp.message_handler(regexp='^Неделя$')
 @dp.message_handler(commands='week', state='*')
@@ -130,7 +130,7 @@ async def get_week(message: types.Message):
     user_data = await state.get_data()
     group = user_data['group']
     text = craft_schedule(group, mode=2)
-    await message.answer(escape_md(text))
+    await message.answer(text)
 
 @dp.message_handler(commands='update', state='*')
 async def update_user_group(message: types.Message, state: FSMContext):
@@ -207,7 +207,7 @@ async def process_prev_week(query: types.CallbackQuery):
 
     # Catch if user got border
     try:
-        await query.message.edit_text(escape_md(text), reply_markup=keyboard)
+        await query.message.edit_text(text, reply_markup=keyboard)
         await bot.answer_callback_query(query.id)
     except aiogram.utils.exceptions.MessageNotModified:
         await bot.answer_callback_query(query.id, text='Вы достигли начала расписания\nДальше двигаться некуда', show_alert=True)
@@ -233,7 +233,7 @@ async def process_next_week(query: types.CallbackQuery):
     text = craft_schedule(user_data['group'], mode=2, special_date=current_week)
     keyboard = craft_paging_keyboard()
     try:
-        await query.message.edit_text(escape_md(text), reply_markup=keyboard)
+        await query.message.edit_text(text, reply_markup=keyboard)
         await bot.answer_callback_query(query.id)
     except aiogram.utils.exceptions.MessageNotModified:
         await bot.answer_callback_query(query.id, text='Вы достигли конца расписания\nДальше двигаться некуда', show_alert=True)
@@ -256,9 +256,12 @@ async def show_week_page(message: types.Message):
     keyboard = craft_paging_keyboard()
 
     # Update page state
-    await state.update_data(page=date.today())
+    today = date.today()
+    if today.weekday() == 6:
+        today += datetime.timedelta(days=1)
 
-    await message.answer(escape_md(text), reply_markup=keyboard)
+    await state.update_data(page=today)
+    await message.answer(text, reply_markup=keyboard)
 
 @dp.message_handler(commands='update_db')
 async def admin_update_db(message: types.Message):

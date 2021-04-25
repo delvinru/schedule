@@ -43,7 +43,7 @@ def parse_day(data: list, one_day: bool) -> str:
 
 def craft_schedule(group: str, mode: int, special_date = None) -> str:
     """
-    Craft schedule for user
+    Craft schedule for user, return escaped string
 
     group:str - user group
 
@@ -59,6 +59,7 @@ def craft_schedule(group: str, mode: int, special_date = None) -> str:
 
     data = []
     res = ''
+    # TODO: think about more rational if else statements
     if mode == 0:
         # Check if schedule was requested in sunday, then return next monday
         if today.weekday() == 6:
@@ -72,6 +73,9 @@ def craft_schedule(group: str, mode: int, special_date = None) -> str:
         # Fix for week number
         today += datetime.timedelta(days=1)
     elif mode == 2:
+        # Check if schedule was requested in sunday, then return next monday
+        if today.weekday() == 6:
+            today += datetime.timedelta(days=1)
         data = parser.get_WeekSchedule(today, group)
 
     if mode == 0 or mode == 1:
@@ -79,7 +83,7 @@ def craft_schedule(group: str, mode: int, special_date = None) -> str:
         try:
             res = parse_day(data, one_day=True)
         except:
-            return 'Возникла ошибочка в получении расписания!'
+            return 'Возникла ошибочка в получении расписания\!'
     elif mode == 2:
         # Parsing week schedule
         day = []
@@ -92,7 +96,7 @@ def craft_schedule(group: str, mode: int, special_date = None) -> str:
                 day = []
                 day_id = lesson[2]
                 day.append(lesson)
-    res = 'Текущая неделя: ' + str(parser.get_WeekNumber(today)) + '\n' + res
+    res = bold('Текущая неделя:', str(parser.get_WeekNumber(today))) + '\n' + escape_md(res)
     return res
 
 def craft_week_message() -> str:
