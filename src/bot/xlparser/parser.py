@@ -256,8 +256,9 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
         try:
             if mod == 0:
                 line = re.sub(r"\n", " ", line)
+                line = re.sub(r" {2,}", " ", line) # Удаление первого вхождение пробелов
+            line = line.rstrip() # Удаление последнего вхождения пробелов
             line = re.sub(r"\t", "", line)
-            line = re.sub(r" {2,}", " ", line)
             line = re.sub(r"\…+.*", "", line)
         except:
             pass
@@ -285,10 +286,10 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
             finally:
                 return (lesson, typ, audit, start_time, end_time, order, even, week)
 
-        find = re.match(r"([\d\, \-\/н]+)[нeд]{0,3}\.?", lesson) # 12,15 н.
+        find = re.match(r"([\d\, \-\/н(лк)(пр)]+)[нeд]{1,3}\.?", lesson) # 12,15 н.
         if find != None:
             try:
-                f = re.findall(r"(\d{1,2})[ ]*-[ ]*(\d{1,2})", find.group(1))
+                f = re.findall(r"(\d{1,2})[ ]*\-[ ]*(\d{1,2})", find.group(1))
                 for pair in f:
                     for i in range(int(pair[0]), int(pair[1]) + 1):
                         arr.append(i)
@@ -341,17 +342,18 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
 
     def _recurparser(line):
         try:
-            find = re.search(r"(.*)\n(.*)", line)
+            line = line.rstrip()
+            find = re.search(r"(.*)( {4,}|\n)(.*)", line)
         except:
             find = None
         result = []
 
         if find == None:
-            result.append(line)
+            result.append(_antidot(line, 0))
             return result
         else:
-            result.append(find.group(1))
-            result.extend(_recurparser(find.group(2)))
+            result.append(_antidot(find.group(1), 0))
+            result.extend(_recurparser(find.group(3)))
             return result
 
     def _twiceschedule(obj): # Обрабочкик двойных объектов на одном слоте
@@ -405,7 +407,7 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
             for i in range(len(day_lesson)):
                 lesson = day_lesson[i]
                 typ = type_lesson[i]
-                audit = audit_lesson[i] 
+                audit = audit_lesson[i]
                 time = next(time_iter)
                 if evenodd % 2 == 0:
                     eo = "EVEN"
@@ -431,7 +433,7 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
             audit_lesson = sheet.col_values(col + 2, start_rowx=3 + 18 * k, end_rowx=21 + 18 * k) # Делаем срез аудиторий
 
             for i in range(len(day_lesson)):# Убираем плхие символы и т.д.
-                day_lesson[i] = _antidot(day_lesson[i])
+                day_lesson[i] = _antidot(day_lesson[i], 1)
                 day_lesson[i] = _substitute(day_lesson[i])
                 type_lesson[i] = _antidot(type_lesson[i])
                 audit_lesson[i] = _antidot(audit_lesson[i])
@@ -444,7 +446,7 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
             for i in range(len(day_lesson)):
                 lesson = day_lesson[i]
                 typ = type_lesson[i]
-                audit = audit_lesson[i] 
+                audit = audit_lesson[i]
                 time = next(time_iter)
                 if evenodd % 2 == 0:
                     eo = "EVEN"
@@ -467,7 +469,7 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
         type_lesson = sheet.col_values(col, start_rowx=93, end_rowx=105)
         audit_lesson = sheet.col_values(col + 2, start_rowx=93, end_rowx=105)
         for i in range(len(day_lesson)): # Убираем плхие символы и т.д.
-            day_lesson[i] = _antidot(day_lesson[i])
+            day_lesson[i] = _antidot(day_lesson[i], 1)
             day_lesson[i] = _substitute(day_lesson[i])
             type_lesson[i] = _antidot(type_lesson[i])
             audit_lesson[i] = _antidot(audit_lesson[i])

@@ -274,6 +274,6 @@ async def admin_update_db(message: types.Message):
     try:
         parser.update_MireaSchedule()
     except:
-        await message.answer('Что-то пошло не так/!')
+        await message.answer('Что\-то пошло не так\!')
     else:
         await message.answer('База данных успешно обновлена\!')
