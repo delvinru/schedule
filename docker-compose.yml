@@ -11,6 +11,7 @@ services:
             - POSTGRES_USER=${POSTGRES_USER}
             - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
             - POSTGRES_DB=${POSTGRES_DB}
+        restart: always
     bot:
         build: 
             context: ./src/bot
@@ -22,7 +23,7 @@ services:
             - POSTGRES_USER=${POSTGRES_USER}
             - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
             - POSTGRES_DB=${POSTGRES_DB}
-        restart: on-failure
+        restart: always
         depends_on:
             - database
         links:
