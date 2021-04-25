@@ -3,7 +3,7 @@ import datetime
 
 import xlparser.parser as parser
 from aiogram import types
-from aiogram.utils.markdown import bold, text, escape_md
+from aiogram.utils.markdown import bold, text, escape_md, italic
 from loguru import logger
 
 
@@ -36,9 +36,9 @@ def parse_day(data: list, one_day: bool) -> str:
         if one_day:
             header += 'День самостоятельных занятий\n\n'
         else:
-            header += 'День самостоятельных занятий\n'
+            header += 'День самостоятельных занятий'
 
-    res = header + '\n'.join(lessons)
+    res = bold(header) + escape_md('\n'.join(lessons))
     return res
 
 def craft_schedule(group: str, mode: int, special_date = None) -> str:
@@ -96,7 +96,10 @@ def craft_schedule(group: str, mode: int, special_date = None) -> str:
                 day = []
                 day_id = lesson[2]
                 day.append(lesson)
-    res = bold('Текущая неделя:', str(parser.get_WeekNumber(today))) + '\n' + escape_md(res)
+
+        # Border situation, parse last day in week schedule
+        res += parse_day(day, one_day=False) + '\n\n'
+    res = italic('Текущая неделя:', str(parser.get_WeekNumber(today))) + '\n' + res
     return res
 
 def craft_week_message() -> str:
