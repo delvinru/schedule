@@ -275,7 +275,7 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
         if lesson == "":
             return day_lessons
         arr = []
-        find = re.match(r"кр. ([\d\, ]+)[нeд]{0,3}\.?", lesson) # кр. 12,15 н. 
+        find = re.match(r"кр\.? ([\d\, ]+)[нeд]{0,3}\.?", lesson) # кр. 12,15 н. 
         if find != None:
             try:
                 find = re.findall(r"\d{1,2}", find.group(1))
