@@ -143,7 +143,6 @@ def get_TimeSchedule(today, group):
     '''
     time_sch = []
     cur = get_TodayList(today, group)
-    logger.warning(cur)
 
     for each in cur:
         time_sch.append((each[6], each[7]))

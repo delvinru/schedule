@@ -114,17 +114,15 @@ def craft_user_profile(message: types.Message, group: str) -> str:
 
 def craft_time_schedule(group: str) -> str:
     today = date.today()
-    logger.info(f'Get group: {group}')
-    try:
-        data = parser.get_TimeSchedule(today, group)
-        logger.info(f'Get data: {data}')
-    except Exception as e:
-        logger.warning(e)
-        return 'Oops'
 
+    # If sunday, function get_timeSchedule return None
+    if today.weekday() == 6:
+        today += datetime.timedelta(days=1)
+
+    data = parser.get_TimeSchedule(today, group)
 
     res = bold('Время занятий:\n', sep="")
     for i, el in enumerate(data):
-        res += text(bold(str(i+1)), el[0], " : ", el[1], "\n", sep="")
+        res += text(f'{bold(str(i+1))}\. {escape_md(el[0]):>5}: {escape_md(el[1])}\n')
     
     return res
