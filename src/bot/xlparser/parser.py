@@ -141,13 +141,12 @@ def get_TimeSchedule(today, group):
     '''
     Возвращает список пар времени начала/конца занятий
     '''
-    time_sch = []
-    cur = get_TodayList(today, group)
+    # time_sch = []
+    # cur = get_TodayList(today, group)
 
-    for each in cur:
-        time_sch.append((each[6], each[7]))
-    
-    return time_sch
+    # for each in cur:
+    #     time_sch.append((each[6], each[7]))
+    return cfg.time_schedule
 
 def check_GroupExist(group):
     '''
