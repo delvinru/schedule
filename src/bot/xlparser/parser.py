@@ -563,14 +563,14 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
     col = 0
     now_tag = _check_tags(special_tags, xlfilename)
 
-    if now_tag == "Маг" or now_tag == "маг":
+    if now_tag == "маг":
         start_slice = sheet.col_values(2, start_rowx=3, end_rowx=21)
         end_slice = sheet.col_values(3, start_rowx=3, end_rowx=21)
     elif now_tag == None:
         start_slice = sheet.col_values(2, start_rowx=3, end_rowx=15)
         end_slice = sheet.col_values(3, start_rowx=3, end_rowx=15)
 
-    if now_tag == None or now_tag == "Маг" or now_tag == "маг":
+    if now_tag == None or now_tag == "маг":
         for time in start_slice:
             if time != '':
                 time_schedule.append(time)
@@ -596,10 +596,10 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
         else:
             col += 1
 
-            if now_tag == "Маг" or now_tag == "маг":
+            if  now_tag == "маг":
                 groups_shedule[find.group(1)] = [[], [], [], [], [], []] # ! Записывает только имя группы. Все спецобозначения откидываются
                 _mag_handler()
-            elif now_tag == "Экз" or now_tag == "сессия":
+            elif now_tag == "экз":
                 groups_shedule[find.group(1)] = []
                 _exams_handler()
             else:
