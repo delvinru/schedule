@@ -25,7 +25,8 @@ def update_MireaSchedule():
 
     # full_groups_shedule = {}
     
-    tm.clear_Schedule() # Сначала подключаемся и скачиваем файлы, а только потом удаляем базу
+    tm.clear_Schedule("SCHEDULE") # Сначала подключаемся и скачиваем файлы, а только потом удаляем базу
+    tm.clear_Schedule("EXAMS")
 
     for filename in os.listdir("./xlparser/xl"):
         # * Полный список групп с расписанием * #
@@ -525,9 +526,10 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
             for i in range(len(date_exams)):
                 date_exams[i] = _antidot(date_exams[i], 0)
             schedule = []
+            exams_types = ["Экзамен", "Консультация", "Зачет", "Зачёт", "Зачёт диф.", "Диф. зачет", "Курсовая работа", "КП"]
             for i in range(0, len(day_exams)):
                 typ = day_exams[i]
-                if typ == "Экзамен" or typ == "Консультация" or typ == "Зачет" or typ == "Зачёт" or typ == "Зачёт диф." or typ == "КП":
+                if typ in exams_types:
                     exam = day_exams[i + 1]
                     lector = day_exams[i + 2]
                     time = time_exams[i]
