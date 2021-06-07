@@ -161,7 +161,14 @@ def check_GroupExist(group):
         return True
 
 
+def get_ExamsSchedule(group):
+    '''
+    Возвращает список экзаменов
+    '''
+    cur = tm.select_group_exams(group)
+    result = cur.fetchall()
 
+    return result
 
 
 
@@ -242,7 +249,7 @@ def get_xlfiles(filename="./xlparser/links.txt"):
 
 def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons=[]):
     '''
-    Вытаскивает из xl-таблиц все группы и их расписание. Возвращает словарь dic[group]= [[Monday], [Tuesday], [Wednesday]...];\n
+    Вытаскивает из xl-таблиц все группы и их расписание. Возвращает словарь dic[group];\n
     Возвращает None если имя файла имеет block_tags. Также имеет обработчики для special_tags. Если special_tag не найден, 
     то используется стандартный обработчик.
     '''
@@ -496,6 +503,39 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
             order += 0.5
         groups_schedule[find.group(1)][5] = schedule
 
+    def _exams_handler(): #Обработчик экзаменов
+            nonlocal sheet, groups_schedule, find, col
+            day_exams = []
+            time_exams = []
+            audit_exams = []
+            day_exams.extend(sheet.col_values(col - 1, start_rowx=2 , end_rowx=75))
+            time_exams.extend(sheet.col_values(col, start_rowx=2 , end_rowx=75))
+            audit_exams.extend(sheet.col_values(col + 1, start_rowx=2 , end_rowx=75))
+
+            for i in range(len(day_exams)): # Убираем плхие символы и т.д.
+                day_exams[i] = _antidot(day_exams[i], 0)
+                day_exams[i] = _substitute(day_exams[i])
+                time_exams[i] = _antidot(time_exams[i], 0)
+                audit_exams[i] = _antidot(audit_exams[i], 0)
+                
+
+            date_exams = sheet.col_values(1, start_rowx=2, end_rowx=75)
+            for i in range(len(date_exams)):
+                date_exams[i] = _antidot(date_exams[i], 0)
+            schedule = []
+            for i in range(0, len(day_exams)):
+                typ = day_exams[i]
+                if typ == "Экзамен" or typ == "Консультация" or typ == "Зачет" or typ == "Зачёт" or typ == "Зачёт диф." or typ == "КП":
+                    exam = day_exams[i + 1]
+                    lector = day_exams[i + 2]
+                    time = time_exams[i]
+                    audit = audit_exams[i]
+                    date = date_exams[i]
+                    obj = [date, exam, typ, lector, time, audit]
+                    schedule.append(obj)
+
+            groups_shedule[find.group(1)] = schedule
+
     
 
     # --- Основная часть функции --- #
@@ -507,7 +547,14 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
     time_schedule = [] # Раписание для текущего файла
     # * Открываем эксель таблицу * # 
     rb = xlrd.open_workbook("./xl/" + xlfilename)
-    sheet = rb.sheet_by_index(0)
+    for i in range(4): # Бывает, что расписание создано не на 0-ом листе
+        sheet = rb.sheet_by_index(i)
+        try:
+            sheet.row_values(1)
+        except:
+            continue
+        else:
+            break
     
     col = 0
     now_tag = _check_tags(special_tags, xlfilename)
@@ -515,22 +562,23 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
     if now_tag == "Маг" or now_tag == "маг":
         start_slice = sheet.col_values(2, start_rowx=3, end_rowx=21)
         end_slice = sheet.col_values(3, start_rowx=3, end_rowx=21)
-    else:
+    elif now_tag == None:
         start_slice = sheet.col_values(2, start_rowx=3, end_rowx=15)
         end_slice = sheet.col_values(3, start_rowx=3, end_rowx=15)
 
-    for time in start_slice:
-        if time != '':
-            time_schedule.append(time)
-        else:
-            time_schedule.append(time_schedule[len(time_schedule) - 1])
-    i = 0
-    for time in end_slice:
-        if time != '':
-            time_schedule[i] = (time_schedule[i], time)
-        else:
-            time_schedule[i] = time_schedule[i - 1]
-        i += 1
+    if now_tag == None or now_tag == "Маг" or now_tag == "маг":
+        for time in start_slice:
+            if time != '':
+                time_schedule.append(time)
+            else:
+                time_schedule.append(time_schedule[len(time_schedule) - 1])
+        i = 0
+        for time in end_slice:
+            if time != '':
+                time_schedule[i] = (time_schedule[i], time)
+            else:
+                time_schedule[i] = time_schedule[i - 1]
+            i += 1
 
     
     # * Крутим все группы, заполняем расписание * #
@@ -543,11 +591,15 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
             col += 1
         else:
             col += 1
-            groups_schedule[find.group(1)] = [[], [], [], [], [], []] # ! Записывает только имя группы. Все спецобозначения откидываются
 
             if now_tag == "Маг" or now_tag == "маг":
+                groups_shedule[find.group(1)] = [[], [], [], [], [], []] # ! Записывает только имя группы. Все спецобозначения откидываются
                 _mag_handler()
+            elif now_tag == "Экз" or now_tag == "сессия":
+                groups_shedule[find.group(1)] = []
+                _exams_handler()
             else:
+                groups_shedule[find.group(1)] = [[], [], [], [], [], []] # ! Записывает только имя группы. Все спецобозначения откидываются
                 _default_handler()
 
     return groups_schedule
@@ -568,23 +620,41 @@ def convert_in_postgres(group_schedule):
     Записывает в базу PostgreSQL расписание группы. Сначала 
     '''
     global _ident
-    days = ["ПОНЕДЕЛЬНИК", "ВТОРНИК", "СРЕДА", "ЧЕТВЕРГ", "ПЯТНИЦА", "СУББОТА"]
-    days_iter = iter(days)
-
     for group in group_schedule.keys():
-        days_iter = iter(days)
-        for day in group_schedule[group]:
-            day_now = next(days_iter)
-            for lesson_info in day:
-                lesson, typ, audit, start_time, end_time, order, even, week = lesson_info
-                
-                strweek = [str(i) for i in week]
-                strweek = "{" + ",".join(strweek) + "}"
-                
-                
+        if len(group_schedule[group][0]) == 6: # Значит расписание экзаменов
+            tag = "Exams"
+            break
+        else:
+            tag = "Schedule"
+            break
+
+    if tag == "Exams":
+        for group in group_schedule.keys():
+            for day_info in group_schedule[group]:
+                date, exam, typ, lector, time, audit = day_info
+
                 idn = str(_ident)
-                tm.insert_lesson(idn, group, day_now, lesson, typ, audit, start_time, end_time, order, even, strweek)
+                tm.insert_exam(idn, group, date, exam, typ, lector, time, audit)
                 _ident += 1
+            
+    else:
+        days = ["ПОНЕДЕЛЬНИК", "ВТОРНИК", "СРЕДА", "ЧЕТВЕРГ", "ПЯТНИЦА", "СУББОТА"]
+        days_iter = iter(days)
+
+        for group in group_schedule.keys():
+            days_iter = iter(days)
+            for day in group_schedule[group]:
+                day_now = next(days_iter)
+                for lesson_info in day:
+                    lesson, typ, audit, start_time, end_time, order, even, week = lesson_info
+                    
+                    strweek = [str(i) for i in week]
+                    strweek = "{" + ",".join(strweek) + "}"
+                    
+                    
+                    idn = str(_ident)
+                    tm.insert_lesson(idn, group, day_now, lesson, typ, audit, start_time, end_time, order, even, strweek)
+                    _ident += 1
 
 
 if __name__ == "__main__":
