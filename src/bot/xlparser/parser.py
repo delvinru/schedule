@@ -1,6 +1,7 @@
 import json
 import os
 import re
+
 from datetime import *
 
 import requests
@@ -72,7 +73,8 @@ def get_TomorrowSchedule(today, group):
     '''
     Возвращает расписание [список] группы на сегодня. Возвращает None, если вызов произошел в cубботу.
     '''
-    td = date(today.year, today.month, today.day + 1)
+    td = date(today.year, today.month, today.day)
+    td += timedelta(days=1)
     return get_TodaySchedule(td, group)
 
 def get_WeekSchedule(today, group):
