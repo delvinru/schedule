@@ -169,9 +169,8 @@ def get_ExamsSchedule(group):
     Возвращает список экзаменов
     '''
     cur = tm.select_group_exams(group)
-    result = cur.fetchall()
 
-    return result
+    return cur
 
 
 
@@ -273,10 +272,9 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
             pass
         return line
 
-    def _substitute(line): # Замена длинных обозначений на короткие
-        nonlocal substitute_lessons
-        for i in substitute_lessons:
-            line = re.sub(i, substitute_lessons[i], line)
+    def _substitute(line, substitutions): # Замена длинных обозначений на короткие
+        for i in substitutions:
+            line = re.sub(i, substitutions[i], line)
         return line
 
     def _weekslicer(day_lessons): # Обработчик влючения/исключения недель
@@ -404,7 +402,7 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
 
             for i in range(len(day_lesson)): # Убираем плохие символы 
                 day_lesson[i] = _antidot(day_lesson[i], 1)
-                day_lesson[i] = _substitute(day_lesson[i])
+                day_lesson[i] = _substitute(day_lesson[i], substitute_lessons)
                 type_lesson[i] = _antidot(type_lesson[i])
                 audit_lesson[i] = _antidot(audit_lesson[i])
             
@@ -443,7 +441,7 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
 
             for i in range(len(day_lesson)):# Убираем плхие символы и т.д.
                 day_lesson[i] = _antidot(day_lesson[i], 1)
-                day_lesson[i] = _substitute(day_lesson[i])
+                day_lesson[i] = _substitute(day_lesson[i], substitute_lessons)
                 type_lesson[i] = _antidot(type_lesson[i])
                 audit_lesson[i] = _antidot(audit_lesson[i])
             
@@ -479,7 +477,7 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
         audit_lesson = sheet.col_values(col + 2, start_rowx=93, end_rowx=105)
         for i in range(len(day_lesson)): # Убираем плхие символы и т.д.
             day_lesson[i] = _antidot(day_lesson[i], 1)
-            day_lesson[i] = _substitute(day_lesson[i])
+            day_lesson[i] = _substitute(day_lesson[i], substitute_lessons)
             type_lesson[i] = _antidot(type_lesson[i])
             audit_lesson[i] = _antidot(audit_lesson[i])
         
@@ -517,7 +515,7 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
 
             for i in range(len(day_exams)): # Убираем плхие символы и т.д.
                 day_exams[i] = _antidot(day_exams[i], 0)
-                day_exams[i] = _substitute(day_exams[i])
+                day_exams[i] = _substitute(day_exams[i], substitute_lessons)
                 time_exams[i] = _antidot(time_exams[i], 0)
                 audit_exams[i] = _antidot(audit_exams[i], 0)
                 
@@ -530,6 +528,7 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
             for i in range(0, len(day_exams)):
                 typ = day_exams[i]
                 if typ in exams_types:
+                    typ = _substitute(typ, cfg.substitute_exams)
                     exam = day_exams[i + 1]
                     lector = day_exams[i + 2]
                     time = time_exams[i]
