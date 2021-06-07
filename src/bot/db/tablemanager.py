@@ -16,16 +16,18 @@ class Database(object):
         Отчистка таблицы.
         '''
         self.cursor.execute('DELETE FROM SCHEDULE *')
+        self.cursor.execute('DELETE FROM EXAMS *')
         self.con.commit()
-        print("Successfully cleared table Schedule")
+        print("Successfully cleared table Schedule and Exams")
 
     def _delete_table(self):
         '''
         Удалить таблицу.
         '''
         self.cursor.execute('DROP TABLE SCHEDULE')
+        self.cursor.execute('DROP TABLE EXAMS')
         self.con.commit()
-        print("Successfully deleted table Schedule")
+        print("Successfully deleted table Schedule and Exams")
 
     def end(self):
         '''
@@ -77,6 +79,13 @@ class Database(object):
         VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         self.cursor.execute(query, (idn, group, day_now, lesson, typ, audit, start_time, end_time, order, even, strweek, ))
+
+    def insert_exam(self, idn, group, day, exam, typ, lector, time, audit):
+        query = """
+        INSERT INTO EXAMS (ID,GRP,DAY,EXAM,TYPE,LECTOR,TIME,AUDIT)
+        VALUES(%s,%s,%s,%s,%s,%s,%s,%s)
+        """
+        self.cursor.execute(query, (idn, group, day, exam, typ, lector, time, audit, ))
     
     def select_group_and_week_day(self, group, week_day, even_week):
         query = """
@@ -103,6 +112,15 @@ class Database(object):
         ORDER BY id;
         """
         self.cursor.execute(query, (group, even_week, ))
+        return self.cursor.fetchall()
+
+    def select_group_exams(self, group):
+        query = """
+        SELECT * FROM EXAMS
+        WHERE grp=%s
+        ORDER BY id;
+        """
+        self.cursor.execute(query, (group, ))
         return self.cursor.fetchall()
     
     def single_commit(self):
