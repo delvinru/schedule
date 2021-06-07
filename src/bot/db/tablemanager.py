@@ -11,23 +11,27 @@ class Database(object):
         )
         self.cursor = self.con.cursor()
 
-    def _clear_table(self):
+    def _clear_table(self, table):
         '''
         Отчистка таблицы.
         '''
-        self.cursor.execute('DELETE FROM SCHEDULE *')
-        self.cursor.execute('DELETE FROM EXAMS *')
+        if table == "SCHEDULE":
+            self.cursor.execute('DELETE FROM SCHEDULE *')
+        elif table == "EXAMS":
+            self.cursor.execute('DELETE FROM EXAMS *')
         self.con.commit()
-        print("Successfully cleared table Schedule and Exams")
+        print("Successfully cleared table " + table)
 
-    def _delete_table(self):
+    def _delete_table(self, table):
         '''
         Удалить таблицу.
         '''
-        self.cursor.execute('DROP TABLE SCHEDULE')
-        self.cursor.execute('DROP TABLE EXAMS')
+        if table == "SCHEDULE":
+            self.cursor.execute('DROP TABLE SCHEDULE')
+        elif table == "EXAMS":
+            self.cursor.execute('DROP TABLE EXAMS')
         self.con.commit()
-        print("Successfully deleted table Schedule and Exams")
+        print("Successfully deleted table " + table)
 
     def end(self):
         '''
@@ -36,17 +40,17 @@ class Database(object):
         self.con.commit()
         self.con.close()
 
-    def clear_Schedule(self):
+    def clear_Schedule(self, table):
         '''
         Отчистить таблицу Schedule.
         '''
-        self._clear_table()
+        self._clear_table(table)
 
-    def rebuild_Schedule(self):
+    def rebuild_Schedule(self, table):
         '''
         Удалить и пересоздать таблицу Schedule
         '''
-        self._delete_table()
+        self._delete_table(table)
         self.init_table()
     
     def insert_user(self, tgid: int, username: str, first_name: str, lang: str, group: str):
