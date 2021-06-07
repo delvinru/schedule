@@ -30,7 +30,7 @@ def update_MireaSchedule():
 
     for filename in os.listdir("./xl"):
         # * Полный список групп с расписанием * #
-        groups_schedule = parse_xlfiles(filename, cfg.block_tags, cfg.special_tags, cfg.substitute_lessons)
+        groups_schedule = parse_xlfiles(filename)
         if groups_schedule == None:
             continue
 
@@ -249,7 +249,7 @@ def get_xlfiles(filename="./xlparser/links.txt"):
                 with open("./xl/" + filename[0], "wb") as f:
                     f.write(res.content)
 
-def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons=[]):
+def parse_xlfiles(xlfilename):
     '''
     Вытаскивает из xl-таблиц все группы и их расписание. Возвращает словарь dic[group];\n
     Возвращает None если имя файла имеет block_tags. Также имеет обработчики для special_tags. Если special_tag не найден, 
@@ -402,7 +402,7 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
 
             for i in range(len(day_lesson)): # Убираем плохие символы 
                 day_lesson[i] = _antidot(day_lesson[i], 1)
-                day_lesson[i] = _substitute(day_lesson[i], substitute_lessons)
+                day_lesson[i] = _substitute(day_lesson[i], cfg.substitute_lessons)
                 type_lesson[i] = _antidot(type_lesson[i])
                 audit_lesson[i] = _antidot(audit_lesson[i])
             
@@ -441,7 +441,7 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
 
             for i in range(len(day_lesson)):# Убираем плхие символы и т.д.
                 day_lesson[i] = _antidot(day_lesson[i], 1)
-                day_lesson[i] = _substitute(day_lesson[i], substitute_lessons)
+                day_lesson[i] = _substitute(day_lesson[i], cfg.substitute_lessons)
                 type_lesson[i] = _antidot(type_lesson[i])
                 audit_lesson[i] = _antidot(audit_lesson[i])
             
@@ -477,7 +477,7 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
         audit_lesson = sheet.col_values(col + 2, start_rowx=93, end_rowx=105)
         for i in range(len(day_lesson)): # Убираем плхие символы и т.д.
             day_lesson[i] = _antidot(day_lesson[i], 1)
-            day_lesson[i] = _substitute(day_lesson[i], substitute_lessons)
+            day_lesson[i] = _substitute(day_lesson[i], cfg.substitute_lessons)
             type_lesson[i] = _antidot(type_lesson[i])
             audit_lesson[i] = _antidot(audit_lesson[i])
         
@@ -515,7 +515,7 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
 
             for i in range(len(day_exams)): # Убираем плхие символы и т.д.
                 day_exams[i] = _antidot(day_exams[i], 0)
-                day_exams[i] = _substitute(day_exams[i], substitute_lessons)
+                day_exams[i] = _substitute(day_exams[i], cfg.substitute_lessons)
                 time_exams[i] = _antidot(time_exams[i], 0)
                 audit_exams[i] = _antidot(audit_exams[i], 0)
                 
@@ -524,7 +524,7 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
             for i in range(len(date_exams)):
                 date_exams[i] = _antidot(date_exams[i], 0)
             schedule = []
-            exams_types = ["Экзамен", "Консультация", "Зачет", "Зачёт", "Зачёт диф.", "Диф. зачет", "Курсовая работа", "КП"]
+            exams_types = ["Экзамен", "Консультация", "Зачет", "Зачёт", "Зачёт диф.", "Диф. зачет", "Курсовая работа", "КП", "Защита КП", "Практика"]
             for i in range(0, len(day_exams)):
                 typ = day_exams[i]
                 if typ in exams_types:
@@ -560,7 +560,7 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
             break
     
     col = 0
-    now_tag = _check_tags(special_tags, xlfilename)
+    now_tag = _check_tags(cfg.special_tags, xlfilename)
 
     if now_tag == "маг":
         start_slice = sheet.col_values(2, start_rowx=3, end_rowx=21)
