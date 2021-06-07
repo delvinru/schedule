@@ -50,6 +50,11 @@ def get_TodayList(today, group)
 ```
 Возвращает расписание на неделю/сегодня прямо из базы без доп. обработок.
 
+```python
+def get_ExamsSchedule(group)
+```
+Возвращает расписание всей экзаменационной сессии для группы
+
 ### Другое
 ```python
 def get_links(link, filename="links.txt")
@@ -90,6 +95,5 @@ def convert_in_postgres(group_schedule, con)
 - [x] Use to connection environment variable
 - [x] One permanent or Much short-time connection to base? Short.
 - [x] Think about rational storage use (needed .json and .xlsx in permanent storage? 🤔) Json, bye-bye.
-- [ ] Short form of long-named lesson
-- [ ] Exams parser
-- [ ] Lectors data
+- [x] Short form of long-named lesson
+- [x] Exams parser
