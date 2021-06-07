@@ -26,7 +26,8 @@ async def start(message: types.Message):
         text = ("Привет, это бот с расписанием для РТУ МИРЭА\!✌️\n"
                 "Для начала работы отправь мне свою группу\.")
 
-        logger.info(f"User came to registration menu: {message.from_user.first_name}")
+        logger.info(
+            f"User came to registration menu: {message.from_user.first_name}")
         state = dp.current_state(user=message.from_user.id)
         await state.set_state(User.group)
         keyboard = craft_startup_keyboard()
@@ -39,6 +40,7 @@ async def start(message: types.Message):
         # By default show today schedule
         await get_today(message)
 
+
 @dp.message_handler(commands='cancel', state='*')
 async def cancel_handler(message: types.Message, state: FSMContext):
     current_state = await state.get_state()
@@ -47,14 +49,15 @@ async def cancel_handler(message: types.Message, state: FSMContext):
     await state.finish()
     await message.answer(escape_md('Регистрация в боте отменена!\nМожешь попробовать по новой: /start'))
 
+
 @dp.message_handler(state=User.group)
 async def process_group(message: types.Message, state: FSMContext):
 
-    find_group= re.search(r"\b\w{4}-\d{2}-\d{2}\b", message.text.upper())
+    find_group = re.search(r"\b\w{4}-\d{2}-\d{2}\b", message.text.upper())
     if find_group == None:
         await message.answer("Пожалуйста, укажите группу в правильном формате\!")
         return
-    
+
     if parser.check_GroupExist(find_group.group(0)) == False:
         await message.answer(escape_md("Твоя группа не найдена в нашей базе.🤷‍♂️\nПопробуй снова!"))
         return
@@ -78,15 +81,18 @@ async def process_group(message: types.Message, state: FSMContext):
             lang=message.from_user.language_code,
             group=user_data['group']
         )
-        logger.info(f"User successfully registered: {message.from_user.first_name} with group {user_data['group']}")
+        logger.info(
+            f"User successfully registered: {message.from_user.first_name} with group {user_data['group']}")
         await state.reset_state(with_data=False)
     else:
         await state.update_data(group=find_group.group(0).upper())
         user_data = await state.get_data()
-        db.update_user_info(tgid=message.from_user.id, group=user_data['group'])
+        db.update_user_info(tgid=message.from_user.id,
+                            group=user_data['group'])
         await message.answer(f"Группа: {escape_md(user_data['group'])} успешно обновлена\!")
         logger.info(f"Group updated for user {message.from_user.id}")
         await state.reset_state(with_data=False)
+
 
 @dp.message_handler(regexp='^Сегодня$')
 @dp.message_handler(commands='today', state='*')
@@ -104,6 +110,7 @@ async def get_today(message: types.Message):
     keyboard = craft_startup_keyboard()
     await message.answer(text, reply_markup=keyboard)
 
+
 @dp.message_handler(regexp='^Завтра$')
 @dp.message_handler(commands='next', state='*')
 async def get_tomorrow(message: types.Message):
@@ -117,6 +124,7 @@ async def get_tomorrow(message: types.Message):
     group = user_data['group']
     text = craft_schedule(group, mode=1)
     await message.answer(text)
+
 
 @dp.message_handler(regexp='^Неделя$')
 @dp.message_handler(commands='week', state='*')
@@ -132,16 +140,19 @@ async def get_week(message: types.Message):
     text = craft_schedule(group, mode=2)
     await message.answer(text)
 
+
 @dp.message_handler(commands='update', state='*')
 async def update_user_group(message: types.Message, state: FSMContext):
     await message.answer('Хорошо, укажите вашу группу')
     await state.set_state(User.group)
+
 
 @dp.message_handler(commands='getweek')
 async def get_current_week(message: types.Message):
     logger.info(f'User {message.from_user.id} request get week')
     text = craft_week_message()
     await message.answer(text)
+
 
 @dp.message_handler(commands='time')
 async def get_time_schedule(message: types.Message):
@@ -155,6 +166,7 @@ async def get_time_schedule(message: types.Message):
     group = user_data['group']
     text = craft_time_schedule(group)
     await message.answer(text)
+
 
 @dp.message_handler(commands='exams')
 async def get_exams_schedule(message: types.Message):
@@ -170,6 +182,7 @@ async def get_exams_schedule(message: types.Message):
     text = craft_exams_schedule(group)
     await message.answer(text)
 
+
 @dp.message_handler(commands='me')
 async def get_user_profile(message: types.Message):
     logger.info(f'User {message.from_user.id} request themself profile')
@@ -179,10 +192,11 @@ async def get_user_profile(message: types.Message):
         raise CancelHandler()
 
     user_data = await state.get_data()
-    group= user_data['group']
-    
+    group = user_data['group']
+
     text = craft_user_profile(message, group)
     await message.answer(text)
+
 
 @dp.message_handler(commands='dev')
 async def show_developers(message: types.Message):
@@ -194,9 +208,10 @@ async def show_developers(message: types.Message):
         "\nРазработчик парсера: ",
         bold("@ozzero"),
         "\nПо любым вопросам, предложениям по улучшению бота, можно писать в личку\.",
-        sep = ""
+        sep=""
     )
     await message.answer(data)
+
 
 @dp.callback_query_handler(text='prev_week')
 async def process_prev_week(query: types.CallbackQuery):
@@ -214,9 +229,10 @@ async def process_prev_week(query: types.CallbackQuery):
     current_week = user_data['page']
     if not (parser.get_WeekNumber(current_week) <= 1):
         current_week -= datetime.timedelta(days=7)
-    
+
     await state.update_data(page=current_week)
-    text = craft_schedule(user_data['group'], mode=2, special_date=current_week)
+    text = craft_schedule(user_data['group'],
+                          mode=2, special_date=current_week)
     keyboard = craft_paging_keyboard()
 
     # Catch if user got border
@@ -225,6 +241,7 @@ async def process_prev_week(query: types.CallbackQuery):
         await bot.answer_callback_query(query.id)
     except aiogram.utils.exceptions.MessageNotModified:
         await bot.answer_callback_query(query.id, text='Вы достигли начала расписания\nДальше двигаться некуда', show_alert=True)
+
 
 @dp.callback_query_handler(text='next_week')
 async def process_next_week(query: types.CallbackQuery):
@@ -241,9 +258,10 @@ async def process_next_week(query: types.CallbackQuery):
     current_week = user_data['page']
     if not (parser.get_WeekNumber(current_week) >= 17):
         current_week += datetime.timedelta(days=7)
-    
+
     await state.update_data(page=current_week)
-    text = craft_schedule(user_data['group'], mode=2, special_date=current_week)
+    text = craft_schedule(user_data['group'],
+                          mode=2, special_date=current_week)
     keyboard = craft_paging_keyboard()
     try:
         await query.message.edit_text(text, reply_markup=keyboard)
@@ -260,7 +278,7 @@ async def show_week_page(message: types.Message):
 
     if not await check_state(message, state):
         raise CancelHandler()
-    
+
     user_data = await state.get_data()
     group = user_data['group']
 
@@ -275,6 +293,7 @@ async def show_week_page(message: types.Message):
 
     await state.update_data(page=today)
     await message.answer(text, reply_markup=keyboard)
+
 
 @dp.message_handler(commands='update_db')
 async def admin_update_db(message: types.Message):
