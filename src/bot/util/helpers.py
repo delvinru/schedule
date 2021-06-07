@@ -144,6 +144,9 @@ def craft_time_schedule(group: str) -> str:
 
 def craft_exams_schedule(group: str) -> str:
 
+    if not parser.check_GroupExist_exam(group):
+        return escape_md("Ой, а мы не нашли вашу группу в расписании экзаменов!")
+
     data = parser.get_ExamsSchedule(group)
     text = ''
 
