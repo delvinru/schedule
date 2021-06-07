@@ -54,6 +54,17 @@ def get_TodayList(today, group)
 def get_ExamsSchedule(group)
 ```
 Возвращает расписание всей экзаменационной сессии для группы
+```python
+exams = [ident, group, typ, audit, start_time, end_time, order, even, week]
+# 0 - ident        - идентификатор занятия в базе данных
+# 1 - group        - название группы
+# 2 - day          - день
+# 3 - exam         - название экзамена
+# 4 - typ          - тип экзамена (экзамен, консультация, курсовая работа и тд)
+# 5 - lector       - лектор
+# 6 - time         - время начала
+# 7 - audit        - место провидения экзамена
+```
 
 ### Другое
 ```python
