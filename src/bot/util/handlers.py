@@ -156,6 +156,20 @@ async def get_time_schedule(message: types.Message):
     text = craft_time_schedule(group)
     await message.answer(text)
 
+@dp.message_handler(commands='exams')
+async def get_exams_schedule(message: types.Message):
+    logger.info(f'User {message.from_user.id} request exams schedule')
+    state = dp.current_state(user=message.from_user.id)
+
+    if not await check_state(message, state):
+        raise CancelHandler()
+
+    user_data = await state.get_data()
+    group = user_data['group']
+
+    text = "In progress"
+    await message.answer(text)
+
 @dp.message_handler(commands='me')
 async def get_user_profile(message: types.Message):
     logger.info(f'User {message.from_user.id} request themself profile')
@@ -224,7 +238,6 @@ async def process_next_week(query: types.CallbackQuery):
         raise CancelHandler()
 
     # Increase weeks
-    # current_week = user_data['page'] + datetime.timedelta(days=7)
     current_week = user_data['page']
     if not (parser.get_WeekNumber(current_week) >= 17):
         current_week += datetime.timedelta(days=7)
@@ -273,7 +286,7 @@ async def admin_update_db(message: types.Message):
     await message.answer(escape_md('Начал обновлять базу. Это может занять некоторое время...'))
     try:
         parser.update_MireaSchedule()
-    except:
-        await message.answer('Что\-то пошло не так\!')
+    except Exception as e:
+        await message.answer('Что\-то пошло не так\!\n' + escape_md(e))
     else:
         await message.answer('База данных успешно обновлена\!')

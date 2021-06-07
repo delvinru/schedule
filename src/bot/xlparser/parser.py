@@ -28,7 +28,7 @@ def update_MireaSchedule():
     tm.clear_Schedule("SCHEDULE") # Сначала подключаемся и скачиваем файлы, а только потом удаляем базу
     tm.clear_Schedule("EXAMS")
 
-    for filename in os.listdir("./xlparser/xl"):
+    for filename in os.listdir("./xl"):
         # * Полный список групп с расписанием * #
         groups_schedule = parse_xlfiles(filename, cfg.block_tags, cfg.special_tags, cfg.substitute_lessons)
         if groups_schedule == None:
