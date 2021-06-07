@@ -20,10 +20,10 @@ def update_MireaSchedule():
     Функция сначала обрабатывает все файлы, и только после окончания работы загружает их в базу.  
     '''
 
-    get_links(cfg.link_MireaShedule, cfg.links_file)
+    get_links(cfg.link_MireaSchedule, cfg.links_file)
     get_xlfiles(cfg.links_file)
 
-    # full_groups_shedule = {}
+    # full_groups_schedule = {}
     
     tm.clear_Schedule("SCHEDULE") # Сначала подключаемся и скачиваем файлы, а только потом удаляем базу
     tm.clear_Schedule("EXAMS")
@@ -35,17 +35,17 @@ def update_MireaSchedule():
             continue
 
         # * Записываем расписание в джсон * #
-        # convert_in_json(groups_shedule, filename[:-5] + ".json")
+        # convert_in_json(groups_schedule, filename[:-5] + ".json")
         convert_in_postgres(groups_schedule)
 
         print("filename=" + filename, "Complete!", sep=" ")
 
-        # full_groups_shedule = {**groups_shedule, **full_groups_shedule}                   # Можно сохранять полную базу, которую можно слить в один ОГРОМНЫЙ файл
+        # full_groups_schedule = {**groups_schedule, **full_groups_schedule}                   # Можно сохранять полную базу, которую можно слить в один ОГРОМНЫЙ файл
         groups_schedule.clear() 
 
 
     # with open("./json/AllInOne.json", "w", encoding="utf-8") as f:                        # Создание одной большой базы
-    #     json.dump(full_groups_shedule, f, sort_keys=True, indent=4, ensure_ascii=False)
+    #     json.dump(full_groups_schedule, f, sort_keys=True, indent=4, ensure_ascii=False)
     
     tm.single_commit()
     logger.info("Database updated succefully!")
@@ -538,7 +538,7 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
                     obj = [date, exam, typ, lector, time, audit]
                     schedule.append(obj)
 
-            groups_shedule[find.group(1)] = schedule
+            groups_schedule[find.group(1)] = schedule
 
     
 
@@ -597,13 +597,13 @@ def parse_xlfiles(xlfilename, block_tags=[], special_tags=[], substitute_lessons
             col += 1
 
             if  now_tag == "маг":
-                groups_shedule[find.group(1)] = [[], [], [], [], [], []] # ! Записывает только имя группы. Все спецобозначения откидываются
+                groups_schedule[find.group(1)] = [[], [], [], [], [], []] # ! Записывает только имя группы. Все спецобозначения откидываются
                 _mag_handler()
             elif now_tag == "экз":
-                groups_shedule[find.group(1)] = []
+                groups_schedule[find.group(1)] = []
                 _exams_handler()
             else:
-                groups_shedule[find.group(1)] = [[], [], [], [], [], []] # ! Записывает только имя группы. Все спецобозначения откидываются
+                groups_schedule[find.group(1)] = [[], [], [], [], [], []] # ! Записывает только имя группы. Все спецобозначения откидываются
                 _default_handler()
 
     return groups_schedule

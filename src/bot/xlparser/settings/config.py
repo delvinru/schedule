@@ -2,7 +2,7 @@
 Переменные настройки для parser.
 '''
 
-link_MireaShedule = "https://www.mirea.ru/schedule/"
+link_MireaSchedule = "https://www.mirea.ru/schedule/"
 links_file = "links.txt"
 
 first_september = [2020, 9, 1]
