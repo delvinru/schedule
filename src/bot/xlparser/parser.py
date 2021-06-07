@@ -163,6 +163,16 @@ def check_GroupExist(group):
     else:
         return True
 
+def check_GroupExist_exam(group):
+    '''
+    Проверяет существует ли группа в базе Exams
+    '''
+    cur = tm.select_group_exams(group)
+    if len(cur) == 0:
+        return False
+    else:
+        return True
+
 
 def get_ExamsSchedule(group):
     '''
