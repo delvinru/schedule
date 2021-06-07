@@ -167,7 +167,7 @@ async def get_exams_schedule(message: types.Message):
     user_data = await state.get_data()
     group = user_data['group']
 
-    text = "In progress"
+    text = craft_exams_schedule(group)
     await message.answer(text)
 
 @dp.message_handler(commands='me')

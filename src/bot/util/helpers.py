@@ -133,3 +133,17 @@ def craft_time_schedule(group: str) -> str:
         res += text(f'{bold(str(i+1))}\. {escape_md(el[0]):>5}: {escape_md(el[1])}\n')
     
     return res
+
+def craft_exams_schedule(group: str) -> str:
+
+    data = parser.get_ExamsSchedule(group)
+    text = ''
+
+    for line in data:
+        text += bold(line[2].capitalize()) \
+                + ' \|' + escape_md(line[6]) \
+                + '\| ' + escape_md(line[4]) \
+                + '\| ' + escape_md(line[3]) \
+                + '\| ' + escape_md(line[7]) \
+                + '\n'
+    return text
