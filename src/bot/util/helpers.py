@@ -16,7 +16,8 @@ def parse_day(data: list, one_day: bool) -> str:
         # Skip emty lessons
         if lesson[3] == '':
             continue
-        lessons.append(f'{lesson[8]}. {lesson[4].upper()} | {lesson[3]} | {lesson[5]}')
+        lessons.append(
+            f'{lesson[8]}. {lesson[4].upper()} | {lesson[3]} | {lesson[5]}')
         if lesson[5] != 'Д':
             flag = False
 
@@ -41,14 +42,15 @@ def parse_day(data: list, one_day: bool) -> str:
     res = bold(header) + escape_md('\n'.join(lessons))
     return res
 
-def craft_schedule(group: str, mode: int, special_date = None) -> str:
+
+def craft_schedule(group: str, mode: int, special_date=None) -> str:
     """
     Craft schedule for user, return escaped string
 
     group:str - user group
 
     mode: int: 
-    
+
         0 - today, 1 - tomorrow, 2 - week
     """
 
@@ -99,14 +101,17 @@ def craft_schedule(group: str, mode: int, special_date = None) -> str:
 
         # Border situation, parse last day in week schedule
         res += parse_day(day, one_day=False) + '\n\n'
-    res = italic('Текущая неделя:', str(parser.get_WeekNumber(today))) + '\n' + res
+    res = italic('Текущая неделя:', str(
+        parser.get_WeekNumber(today))) + '\n' + res
     return res
+
 
 def craft_week_message() -> str:
     today = date.today()
     week = parser.get_WeekNumber(today)
     data = text("Текущая неделя: ", bold(str(week)))
     return data
+
 
 def craft_user_profile(message: types.Message, group: str) -> str:
     data = text(
@@ -119,6 +124,7 @@ def craft_user_profile(message: types.Message, group: str) -> str:
     )
     return data
 
+
 def craft_time_schedule(group: str) -> str:
     today = date.today()
 
@@ -130,20 +136,33 @@ def craft_time_schedule(group: str) -> str:
 
     res = bold('Время занятий:\n', sep="")
     for i, el in enumerate(data):
-        res += text(f'{bold(str(i+1))}\. {escape_md(el[0]):>5}: {escape_md(el[1])}\n')
-    
+        res += text(
+            f'{bold(str(i+1))}\. {escape_md(el[0]):>5}: {escape_md(el[1])}\n')
+
     return res
+
 
 def craft_exams_schedule(group: str) -> str:
 
     data = parser.get_ExamsSchedule(group)
     text = ''
 
-    for line in data:
-        text += bold(line[2].capitalize()) \
-                + ' \|' + escape_md(line[6]) \
-                + '\| ' + escape_md(line[4]) \
-                + '\| ' + escape_md(line[3]) \
-                + '\| ' + escape_md(line[7]) \
-                + '\n'
+    for i, line in enumerate(data):
+        text += bold(line[2].title()) \
+            + ' \| ' + escape_md(line[6]) \
+            + ' \| ' + escape_md(line[4]) \
+            + ' \| ' + escape_md(line[3]) \
+            + ' \| ' + bold(line[7]) \
+            + '\n'
+
+        try:
+            if data[i][4] == 'Конс.' and data[i + 1][4] != 'Экз.':
+                text += '\n'
+                continue
+        except OverflowError:
+            pass
+
+        if line[4] == 'Экз.' or 'зачет' in line[4].lower():
+            text += '\n'
+
     return text
