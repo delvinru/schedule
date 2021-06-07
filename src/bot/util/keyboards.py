@@ -26,3 +26,14 @@ def craft_paging_keyboard() -> InlineKeyboardMarkup:
     ]
     keyboard = InlineKeyboardMarkup(row_width=2).add(*buttons)
     return keyboard
+
+def craft_exams_keyboard() -> ReplyKeyboardMarkup:
+    """
+    Method for crafting exam keyboard with function /exams
+    """
+
+    buttons = [
+        KeyboardButton("Экзамены")
+    ]
+    keyboard = ReplyKeyboardMarkup(resize_keyboard=True).row(*buttons)
+    return keyboard

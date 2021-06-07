@@ -14,8 +14,12 @@ pg_port = '5432'
 
 ADMINS = [258229531, 292051709]
 
+# If Exam_status == True, then switch bot in exam mode
+EXAMS_STATUS = True
+
 bot = Bot(token=TOKEN, parse_mode=types.ParseMode.MARKDOWN_V2)
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
-db = Database(database=pg_db, user=pg_user, password=pg_pwd, host=pg_host, port=pg_port)
+db = Database(database=pg_db, user=pg_user,
+              password=pg_pwd, host=pg_host, port=pg_port)

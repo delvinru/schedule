@@ -10,9 +10,9 @@ from aiogram.utils.markdown import bold, escape_md, text
 from loguru import logger
 
 from util.helpers import *
-from util.keyboards import craft_paging_keyboard, craft_startup_keyboard
+from util.keyboards import craft_paging_keyboard, craft_startup_keyboard, craft_exams_keyboard
 from util.middleware import check_state
-from util.settings import ADMINS, db, dp, bot
+from util.settings import ADMINS, db, dp, bot, EXAMS_STATUS
 from util.states import *
 
 
@@ -30,7 +30,12 @@ async def start(message: types.Message):
             f"User came to registration menu: {message.from_user.first_name}")
         state = dp.current_state(user=message.from_user.id)
         await state.set_state(User.group)
-        keyboard = craft_startup_keyboard()
+
+        if EXAMS_STATUS:
+            keyboard = craft_exams_keyboard()
+        else:
+            keyboard = craft_startup_keyboard()
+
         await message.answer(text, reply_markup=keyboard)
     else:
         # Creating a user state in memory to avoid constant database requests
@@ -107,7 +112,12 @@ async def get_today(message: types.Message):
     user_data = await state.get_data()
     group = user_data['group']
     text = craft_schedule(group, mode=0)
-    keyboard = craft_startup_keyboard()
+
+    if EXAMS_STATUS:
+        keyboard = craft_exams_keyboard()
+    else:
+        keyboard = craft_startup_keyboard()
+
     await message.answer(text, reply_markup=keyboard)
 
 
@@ -168,6 +178,7 @@ async def get_time_schedule(message: types.Message):
     await message.answer(text)
 
 
+@dp.message_handler(regexp='^Экзамены$')
 @dp.message_handler(commands='exams')
 async def get_exams_schedule(message: types.Message):
     logger.info(f'User {message.from_user.id} request exams schedule')
@@ -179,8 +190,13 @@ async def get_exams_schedule(message: types.Message):
     user_data = await state.get_data()
     group = user_data['group']
 
+    if EXAMS_STATUS:
+        keyboard = craft_exams_keyboard()
+    else:
+        keyboard = craft_startup_keyboard()
+
     text = craft_exams_schedule(group)
-    await message.answer(text)
+    await message.answer(text, reply_markup=keyboard)
 
 
 @dp.message_handler(commands='me')
