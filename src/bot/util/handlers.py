@@ -58,6 +58,7 @@ async def cancel_handler(message: types.Message, state: FSMContext):
     await message.answer(escape_md('Регистрация в боте отменена!\nМожешь попробовать по новой: /start'))
 
 
+@logger.catch
 @dp.message_handler(state=User.group)
 async def process_group(message: types.Message, state: FSMContext):
 
@@ -82,15 +83,24 @@ async def process_group(message: types.Message, state: FSMContext):
         if message.from_user.username != None:
             user = message.from_user.username
 
-        db.insert_user(
+        res = db.insert_user(
             tgid=message.from_user.id,
             username=user,
             first_name=message.from_user.first_name,
             lang=message.from_user.language_code,
             group=user_data['group']
         )
+
+        if not res:
+            logger.info(
+                f"User failed in registration: {message.from_user.first_name} with group {user_data['group']}")
+            text = 'Ой, что-то пошло не так на нашей стороне, попробуй снова /start'
+            await message.answer(escape_md(text))
+            raise CancelHandler()
+
         logger.info(
             f"User successfully registered: {message.from_user.first_name} with group {user_data['group']}")
+
         await state.reset_state(with_data=False)
     else:
         await state.update_data(group=find_group.group(0).upper())
@@ -181,6 +191,7 @@ async def get_time_schedule(message: types.Message):
     await message.answer(text)
 
 
+@logger.catch
 @dp.message_handler(regexp='^Экзамены$')
 @dp.message_handler(commands='exams')
 async def get_exams_schedule(message: types.Message):
@@ -279,8 +290,7 @@ async def process_next_week(query: types.CallbackQuery):
         current_week += datetime.timedelta(days=7)
 
     await state.update_data(page=current_week)
-    text = craft_schedule(user_data['group'],
-                          mode=2, special_date=current_week)
+    text = craft_schedule(user_data['group'], mode=2, special_date=current_week)
     keyboard = craft_paging_keyboard()
     try:
         await query.message.edit_text(text, reply_markup=keyboard)
@@ -314,6 +324,7 @@ async def show_week_page(message: types.Message):
     await message.answer(text, reply_markup=keyboard)
 
 
+@logger.catch
 @dp.message_handler(commands='update_db')
 async def admin_update_db(message: types.Message):
     """ Admin feature for update database """

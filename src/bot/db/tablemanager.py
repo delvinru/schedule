@@ -51,13 +51,19 @@ class Database(object):
         Удалить и пересоздать таблицу Schedule
         '''
         self._delete_table(table)
-        self.init_table()
     
     def insert_user(self, tgid: int, username: str, first_name: str, lang: str, group: str):
         """ Save user in database """
         query = "INSERT INTO profiles (tgid, username, first_name, language_code, group_name) VALUES (%s, %s, %s, %s, %s)"
-        self.cursor.execute(query, (tgid, username, first_name, lang, group, ))
-        self.con.commit()
+        try:
+            self.cursor.execute(query, (tgid, username, first_name, lang, group, ))
+            self.con.commit()
+        except psycopg2.Error:
+            # Try restore after failed transcation block
+            self.con.commit()
+            return False
+        
+        return True
     
     def get_user_group(self, tgid: int) -> str:
         """ Get user from database """
