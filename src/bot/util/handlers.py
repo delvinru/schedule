@@ -42,8 +42,11 @@ async def start(message: types.Message):
         state = dp.current_state(user=message.from_user.id)
         await state.update_data(group=result, page=date.today())
 
-        # By default show today schedule
-        await get_today(message)
+        # By default show today schedule or exams schedule
+        if EXAMS_STATUS:
+            await get_exams_schedule(message)
+        else:
+            await get_today(message)
 
 
 @dp.message_handler(commands='cancel', state='*')
