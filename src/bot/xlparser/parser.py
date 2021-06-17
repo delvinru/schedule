@@ -19,7 +19,9 @@ def update_MireaSchedule():
     links.txt - список всех ссылок с сайта. Функция очень время затратная, поэтому лучше включать её только вручную, когда это необходимо. \n
     Функция сначала обрабатывает все файлы, и только после окончания работы загружает их в базу.  
     '''
-
+    
+    
+    delete_xlfiles()
     get_links(cfg.link_MireaSchedule, cfg.links_file)
     get_xlfiles(cfg.links_file)
 
@@ -182,6 +184,17 @@ def get_ExamsSchedule(group):
 
     return cur
 
+def delete_xlfiles(dir="./xl/"):
+    '''
+    Удаляет все xlsx файлы из папки dir 
+    '''
+    try:
+        for filename in os.listdir("./xl"):
+            os.remove(dir + filename)
+    except OSError as ERR:
+        print("{0}".format(ERR))
+    else:
+        print("All xlsx have been successfully removed!")
 
 
 
@@ -258,6 +271,7 @@ def get_xlfiles(filename="./xlparser/links.txt"):
             else:
                 with open("./xl/" + filename[0], "wb") as f:
                     f.write(res.content)
+
 
 def parse_xlfiles(xlfilename):
     '''
@@ -550,6 +564,8 @@ def parse_xlfiles(xlfilename):
             groups_schedule[find.group(1)] = schedule
 
     
+
+
 
     # --- Основная часть функции --- #
 

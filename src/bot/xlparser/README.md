@@ -100,6 +100,12 @@ def convert_in_postgres(group_schedule, con)
 ```
 Записывает данные в JSON или POSTGRES.
 
+```python
+def delete_xlfiles(dir='./xl')
+# dir           - Директория
+```
+Удаляет все xl-файлы из директории
+
 ### TODO:
 - [x] Add README for Parser
 - [x] Connection to base using Class
