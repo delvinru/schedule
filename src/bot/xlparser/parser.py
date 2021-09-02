@@ -289,7 +289,7 @@ def parse_xlfiles(xlfilename):
             if mod == 0:
                 line = re.sub(r"\n", " ", line)
                 line = re.sub(r" {2,}", " ", line) # Удаление первого вхождение пробелов
-            line = line.rstrip() # Удаление последнего вхождения пробелов
+            line = line.strip() # Удаление вхождения пробелов в конце и начале
             line = re.sub(r"\t", "", line)
             line = re.sub(r"\…+.*", "", line)
         except:
@@ -317,7 +317,7 @@ def parse_xlfiles(xlfilename):
             finally:
                 return (lesson, typ, audit, start_time, end_time, order, even, week)
 
-        find = re.match(r"([\d\, \-\/н(лк)(пр)]+)[нeд]{1,3}\.?", lesson) # 12,15 н.
+        find = re.match(r"([\d\, \-\/н(лк)(пр)]+)[нeд]{0,3}\.?", lesson) # 12,15 н.
         if find != None:
             try:
                 f = re.findall(r"(\d{1,2})[ ]*\-[ ]*(\d{1,2})", find.group(1))
@@ -374,7 +374,7 @@ def parse_xlfiles(xlfilename):
     def _recurparser(line):
         try:
             line = line.rstrip()
-            find = re.search(r"(.*)( {4,}|\n)(.*)", line)
+            find = re.search(r"(.*)( {4,}|\n|;)(.*)", line) # Нарезаем строку на два блока: (Голова) + (Последний элемент)
         except:
             find = None
         result = []
@@ -383,8 +383,8 @@ def parse_xlfiles(xlfilename):
             result.append(_antidot(line, 0))
             return result
         else:
-            result.append(_antidot(find.group(1), 0))
-            result.extend(_recurparser(find.group(3)))
+            result.extend(_recurparser(find.group(1))) # Еще раз нарезаем голову и добавляем в список, а потом еще и еще, пока не останется один элемент
+            result.append(find.group(3)); # Добавляем в конец вторую половину (там гарантированно только 1 элемент)
             return result
 
     def _twiceschedule(obj): # Обрабочкик двойных объектов на одном слоте
