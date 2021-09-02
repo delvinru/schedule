@@ -166,6 +166,9 @@ async def get_week(message: types.Message):
 
 @dp.message_handler(commands='update', state='*')
 async def update_user_group(message: types.Message, state: FSMContext):
+    if not await check_state(message, state):
+        raise CancelHandler()
+
     await message.answer('Хорошо, укажите вашу группу')
     await state.set_state(User.group)
 
