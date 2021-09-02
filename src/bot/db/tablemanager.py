@@ -1,4 +1,5 @@
 import psycopg2
+from loguru import logger
 
 class Database(object):
     def __init__(self, database, user, password, host, port):
@@ -20,7 +21,7 @@ class Database(object):
         elif table == "EXAMS":
             self.cursor.execute('DELETE FROM EXAMS *')
         self.con.commit()
-        print("Successfully cleared table " + table)
+        logger.info(f"Successfully cleared table {table}")
 
     def _delete_table(self, table):
         '''
@@ -31,7 +32,7 @@ class Database(object):
         elif table == "EXAMS":
             self.cursor.execute('DROP TABLE EXAMS')
         self.con.commit()
-        print("Successfully deleted table " + table)
+        logger.info(f"Successfully deleted table {table}")
 
     def end(self):
         '''

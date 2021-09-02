@@ -41,7 +41,7 @@ if __name__ == "__main__":
     logger.add(
         "logs/debug.log",
         format="[{time:YYYY-MM-DD HH:mm:ss}] {level} | {message}",
-        level="DEBUG",
+        level="TRACE",
         rotation="1 MB")
     logger.add(sys.__stdout__)
 

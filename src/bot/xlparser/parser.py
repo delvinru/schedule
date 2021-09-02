@@ -40,7 +40,8 @@ def update_MireaSchedule():
         # convert_in_json(groups_schedule, filename[:-5] + ".json")
         convert_in_postgres(groups_schedule)
 
-        print("filename=" + filename, "Complete!", sep=" ")
+        logger.trace(f"File {filename} is complete!")
+        
 
         # full_groups_schedule = {**groups_schedule, **full_groups_schedule}                   # Можно сохранять полную базу, которую можно слить в один ОГРОМНЫЙ файл
         groups_schedule.clear() 
@@ -192,9 +193,9 @@ def delete_xlfiles(dir="./xl/"):
         for filename in os.listdir("./xl"):
             os.remove(dir + filename)
     except OSError as ERR:
-        print("{0}".format(ERR))
+        logger.warning("{0}".format(ERR))
     else:
-        print("All xlsx have been successfully removed!")
+        logger.info("All xlsx have been successfully removed!")
 
 
 
@@ -242,9 +243,9 @@ def get_links(link, filename="./xlparser/links.txt"):
     '''
     with open(filename, "w", encoding='utf-8') as f:
         res = requests.get(link)
-        print("LINK=" + link, "CODE="+ str(res.status_code), sep=" ")
-        if res.status_code == 404:
-            print("Something went wrong!")
+        logger.trace(f"LINK={link} CODE={str(res.status_code)}")
+        if res.status_code != 200:
+            logger.warning(f"Something went wrong! Code of last request is {str(res.status_code)}")
         else:
             find = re.findall(r"(https:\/\/.*\/(.*.xlsx))", res.text)
             for link in find:
@@ -265,9 +266,9 @@ def get_xlfiles(filename="./xlparser/links.txt"):
 
             link = link.strip()
             res = requests.get(link)
-            print("LINK=" + link, "CODE="+ str(res.status_code), sep=" ")
-            if res.status_code == 404:
-                print("Something went wrong!")
+            logger.trace(f"LINK={link} CODE={str(res.status_code)}")
+            if res.status_code != 200:
+                logger.warning(f"Something went wrong! Code of last request is {str(res.status_code)}")
             else:
                 with open("./xl/" + filename[0], "wb") as f:
                     f.write(res.content)

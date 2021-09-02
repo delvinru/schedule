@@ -108,7 +108,7 @@ async def process_group(message: types.Message, state: FSMContext):
         db.update_user_info(tgid=message.from_user.id,
                             group=user_data['group'])
         await message.answer(f"Группа: {escape_md(user_data['group'])} успешно обновлена\!")
-        logger.info(f"Group updated for user {message.from_user.id}")
+        logger.info(f"Group for user {message.from_user.id} has been updated to {user_data['group']}")
         await state.reset_state(with_data=False)
 
 
