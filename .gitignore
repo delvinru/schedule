@@ -6,3 +6,4 @@ src/bot/__pycache__
 src/bot/logs/*
 src/data/*
 .env
+.venv/*

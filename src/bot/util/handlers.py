@@ -173,13 +173,6 @@ async def update_user_group(message: types.Message, state: FSMContext):
     await state.set_state(User.group)
 
 
-@dp.message_handler(commands='getweek')
-async def get_current_week(message: types.Message):
-    logger.info(f'User {message.from_user.id} request get week')
-    text = craft_week_message()
-    await message.answer(text)
-
-
 @dp.message_handler(commands='time')
 async def get_time_schedule(message: types.Message):
     logger.info(f'User {message.from_user.id} request time')
@@ -199,6 +192,11 @@ async def get_time_schedule(message: types.Message):
 @dp.message_handler(commands='exams')
 async def get_exams_schedule(message: types.Message):
     logger.info(f'User {message.from_user.id} request exams schedule')
+    if EXAMS_STATUS:
+        keyboard = craft_exams_keyboard()
+    else:
+        keyboard = craft_startup_keyboard()
+
     state = dp.current_state(user=message.from_user.id)
 
     if not await check_state(message, state):
@@ -206,13 +204,8 @@ async def get_exams_schedule(message: types.Message):
 
     user_data = await state.get_data()
     group = user_data['group']
-
-    if EXAMS_STATUS:
-        keyboard = craft_exams_keyboard()
-    else:
-        keyboard = craft_startup_keyboard()
-
     text = craft_exams_schedule(group)
+
     await message.answer(text, reply_markup=keyboard)
 
 

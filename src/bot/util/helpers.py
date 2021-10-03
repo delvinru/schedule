@@ -106,13 +106,6 @@ def craft_schedule(group: str, mode: int, special_date=None) -> str:
     return res
 
 
-def craft_week_message() -> str:
-    today = date.today()
-    week = parser.get_WeekNumber(today)
-    data = text("Текущая неделя: ", bold(str(week)))
-    return data
-
-
 def craft_user_profile(message: types.Message, group: str) -> str:
     data = text(
         "Профиль:\n",
